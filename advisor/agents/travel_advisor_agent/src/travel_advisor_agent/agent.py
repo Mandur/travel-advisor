@@ -1,21 +1,16 @@
-"""Travel advisor agent definition using LangGraph."""
+"""Travel advisor agent definition."""
 
 from __future__ import annotations
 
 from datetime import date
-from typing import TYPE_CHECKING
 
-from langchain_core.messages import SystemMessage
-from langchain_core.tools import tool
-from langgraph.prebuilt import create_react_agent
+from agent_framework import Agent, tool
+from agent_framework.azure import AzureOpenAIResponsesClient
+from azure.identity import DefaultAzureCredential
 
 from shared.config import get_config
 from shared.models import HotelPricing, PriceForecast
-from shared.utils import create_llm, setup_logging
-
-if TYPE_CHECKING:
-    from langgraph.graph.state import CompiledStateGraph
-    from langgraph.checkpoint.base import BaseCheckpointSaver
+from shared.utils import setup_logging
 
 logger = setup_logging("travel-advisor-agent")
 
@@ -92,21 +87,18 @@ def get_price_forecast(
     return forecast.model_dump(mode="json")
 
 
-def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":
-    """Create and return the travel advisor agent as a compiled LangGraph.
-
-    Args:
-        checkpointer: Optional LangGraph checkpointer for persistent sessions.
-            Pass ``None`` when this agent is used as a sub-agent tool by the
-            routing supervisor (stateless single-turn calls).
-    """
+def create_agent() -> Agent:
+    """Create and return the travel advisor agent."""
     config = get_config()
-    llm = create_llm(config.gpt5_mini_deployment)
-    graph = create_react_agent(
-        llm,
-        [get_hotel_pricing, get_price_forecast],
-        state_modifier=SystemMessage(TRAVEL_ADVISOR_INSTRUCTIONS),
-        checkpointer=checkpointer,
+    client = AzureOpenAIResponsesClient(
+        project_endpoint=config.azure_ai_project_endpoint,
+        deployment_name=config.gpt5_mini_deployment,
+        credential=DefaultAzureCredential(),
+    )
+    agent = client.as_agent(
+        name="TravelAdvisorAgent",
+        instructions=TRAVEL_ADVISOR_INSTRUCTIONS,
+        tools=[get_hotel_pricing, get_price_forecast],
     )
     logger.info("Travel advisor agent created successfully")
-    return graph
+    return agent

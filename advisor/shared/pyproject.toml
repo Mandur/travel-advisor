@@ -10,12 +10,9 @@ dependencies = [
     "python-dotenv>=1.0",
     "azure-monitor-opentelemetry-exporter>=1.0.0b46",
     "opentelemetry-sdk>=1.39",
-    # LangGraph / LangChain stack
-    "langgraph>=0.3",
-    "langchain-azure-ai>=0.1",
-    "langchain-core>=0.3",
-    "langgraph-checkpoint-postgres",
-    "psycopg[binary,pool]",
+    # Web framework
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
     # Microsoft 365 Agents SDK — Teams / Bot Service adapter (routing-agent only)
     "microsoft-agents-hosting-core>=0.8.0",
     "microsoft-agents-hosting-fastapi>=0.8.0",

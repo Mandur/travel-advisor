@@ -2,20 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.tools import tool
-from langgraph.prebuilt import create_react_agent
+from agent_framework import Agent
+from agent_framework.azure import AzureOpenAIResponsesClient
+from azure.identity import DefaultAzureCredential
 
 from meeting_broker.agent import create_agent as create_meeting_broker_agent
 from travel_advisor_agent.agent import create_agent as create_travel_advisor_agent
 from shared.config import get_config
-from shared.utils import create_llm, setup_logging
-
-if TYPE_CHECKING:
-    from langgraph.graph.state import CompiledStateGraph
-    from langgraph.checkpoint.base import BaseCheckpointSaver
+from shared.utils import setup_logging
 
 logger = setup_logging("routing-agent")
 
@@ -33,41 +27,39 @@ Rules:
 - Be concise and professional"""
 
 
-def create_agent(checkpointer: "BaseCheckpointSaver") -> "CompiledStateGraph":
-    """Create and return the routing supervisor agent as a compiled LangGraph.
+def create_agent() -> Agent:
+    """Create and return the routing supervisor agent.
 
-    Domain sub-agents are compiled without a checkpointer because each tool
-    call is a stateless single-turn invocation.  Only the supervisor graph
-    carries the persistent session state via ``checkpointer``.
-
-    Args:
-        checkpointer: LangGraph checkpointer for persistent supervisor sessions.
+    Domain agents are wrapped as tools via ``Agent.as_tool()`` and passed to
+    the supervisor.  The supervisor uses the larger model; domain agents each
+    use the smaller model.
     """
     config = get_config()
+    credential = DefaultAzureCredential()
 
-    # Build stateless domain graphs (no checkpointer — used as single-turn tools)
-    _travel_graph = create_travel_advisor_agent()
-    _meeting_graph = create_meeting_broker_agent()
+    travel_advisor = create_travel_advisor_agent()
+    meeting_broker = create_meeting_broker_agent()
 
-    @tool
-    async def travel_advisor(query: str) -> str:
-        """Use for questions about hotel pricing, availability, destinations, price forecasts, and travel planning."""
-        result = await _travel_graph.ainvoke({"messages": [HumanMessage(content=query)]})
-        return result["messages"][-1].content  # type: ignore[index]
+    supervisor_client = AzureOpenAIResponsesClient(
+        project_endpoint=config.azure_ai_project_endpoint,
+        deployment_name=config.gpt5_2_chat_deployment,
+        credential=credential,
+    )
 
-    @tool
-    async def meeting_broker(query: str) -> str:
-        """Use for RFP submissions and inquiries about group meetings and events, including sourcing venue proposals, comparing conference room options, negotiating rates, and coordinating catering, AV equipment, and room setup."""
-        result = await _meeting_graph.ainvoke({"messages": [HumanMessage(content=query)]})
-        return result["messages"][-1].content  # type: ignore[index]
-
-    supervisor_llm = create_llm(config.gpt5_2_chat_deployment)
-    graph = create_react_agent(
-        supervisor_llm,
-        [travel_advisor, meeting_broker],
-        state_modifier=SystemMessage(SUPERVISOR_INSTRUCTIONS),
-        checkpointer=checkpointer,
+    agent = supervisor_client.as_agent(
+        name="RoutingAgent",
+        instructions=SUPERVISOR_INSTRUCTIONS,
+        tools=[
+            travel_advisor.as_tool(
+                name="travel_advisor",
+                description="Use for questions about hotel pricing, availability, destinations, price forecasts, and travel planning.",
+            ),
+            meeting_broker.as_tool(
+                name="meeting_broker",
+                description="Use for RFP submissions and inquiries about group meetings and events, including sourcing venue proposals, comparing conference room options, negotiating rates, and coordinating catering, AV equipment, and room setup.",
+            ),
+        ],
     )
 
     logger.info("Routing supervisor agent created successfully")
-    return graph
+    return agent

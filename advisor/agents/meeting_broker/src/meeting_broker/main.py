@@ -8,10 +8,8 @@ from typing import Annotated
 
 import uvicorn
 from fastapi import Depends, FastAPI, Request
-from langchain_core.messages import HumanMessage
-from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-from langgraph.graph.state import CompiledStateGraph
 from pydantic import BaseModel
+from agent_framework import Agent, Message
 
 from shared.config import get_config
 from shared.utils import setup_logging, setup_telemetry
@@ -24,21 +22,19 @@ logger = setup_logging("meeting-broker-agent")
 async def lifespan(app: FastAPI):
     config = get_config()
     setup_telemetry(config.application_insights_connection_string)
-    async with AsyncPostgresSaver.from_conn_string(config.postgres_connection_string) as checkpointer:
-        await checkpointer.setup()
-        app.state.agent = create_agent(checkpointer=checkpointer)
-        logger.info("Meeting broker agent ready")
-        yield
+    app.state.agent = create_agent()
+    logger.info("Meeting broker agent ready")
+    yield
 
 
 app = FastAPI(title="Meeting Broker Agent", lifespan=lifespan)
 
 
-def get_agent(request: Request) -> CompiledStateGraph:
+def get_agent(request: Request) -> Agent:
     return request.app.state.agent
 
 
-AgentDep = Annotated[CompiledStateGraph, Depends(get_agent)]
+AgentDep = Annotated[Agent, Depends(get_agent)]
 
 
 class ChatRequest(BaseModel):
@@ -59,12 +55,9 @@ async def health() -> dict:
 @app.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest, agent: AgentDep) -> ChatResponse:
     session_id = req.session_id or str(uuid.uuid4())
-    result = await agent.ainvoke(
-        {"messages": [HumanMessage(content=req.message)]},
-        config={"configurable": {"thread_id": session_id}},
-    )
-    reply = result["messages"][-1].content or ""
-    return ChatResponse(reply=reply, session_id=session_id)
+    session = agent.create_session(session_id=session_id)
+    response = await agent.run(Message(role="user", text=req.message), session=session)
+    return ChatResponse(reply=response.text or "", session_id=session_id)
 
 
 if __name__ == "__main__":

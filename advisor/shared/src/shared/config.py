@@ -27,9 +27,6 @@ class AgentConfig(BaseSettings):
     # RFP API
     bearer_token: Annotated[str, Field(validation_alias="BEARER_TOKEN")] = ""
     rfp_api_base_url: Annotated[str, Field(validation_alias="RFP_API_BASE_URL")] = "https://mockzilla-api-erfpmad.delightfulmoss-ca1544a1.eastus.azurecontainerapps.io/mock/rfp"
-    # LangGraph / Azure AI Foundry inference
-    azure_openai_api_version: str = "2024-05-01-preview"
-    postgres_connection_string: Annotated[str, Field(validation_alias="POSTGRES_CONNECTION_STRING")] = ""
 
 
 @lru_cache(maxsize=1)

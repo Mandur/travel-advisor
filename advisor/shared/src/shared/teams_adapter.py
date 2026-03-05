@@ -1,10 +1,9 @@
 """Teams adapter factory for the Microsoft 365 Agents SDK.
 
 Creates a FastAPI router exposing POST /api/messages for Azure Bot Service /
-Microsoft Teams, bridging M365 activity protocol to a LangGraph CompiledStateGraph.
+Microsoft Teams, bridging M365 activity protocol to an agent_framework Agent.
 All M365 SDK imports are isolated here — nothing Teams-specific leaks into
-individual agent packages.
-"""
+individual agent packages."""
 
 from __future__ import annotations
 
@@ -12,7 +11,7 @@ import uuid
 from typing import Any, Callable
 
 from fastapi import APIRouter, Request
-from langchain_core.messages import HumanMessage
+from agent_framework import Message
 from microsoft_agents.hosting.core import TurnContext, TurnState
 from microsoft_agents.hosting.core.app import AgentApplication
 from microsoft_agents.hosting.core.storage import MemoryStorage
@@ -83,12 +82,10 @@ def create_teams_router(get_agent: Callable[[], Any]) -> APIRouter:
         )
 
         agent = get_agent()
-        result = await agent.ainvoke(
-            {"messages": [HumanMessage(content=user_text)]},
-            config={"configurable": {"thread_id": session_id}},
-        )
+        session = agent.create_session(session_id=session_id)
+        response = await agent.run(Message(role="user", text=user_text), session=session)
 
-        reply_text = result["messages"][-1].content or ""
+        reply_text = response.text or ""
         await context.send_activity(reply_text)
         logger.info(
             "Teams message handled: conversation=%s chars_in=%d chars_out=%d",

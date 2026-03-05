@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-from langchain_core.messages import SystemMessage
-from langchain_core.tools import tool
-from langgraph.prebuilt import create_react_agent
+from agent_framework import Agent, tool
+from agent_framework.azure import AzureOpenAIResponsesClient
+from azure.identity import DefaultAzureCredential
 
 from shared.config import get_config
-from shared.utils import create_llm, setup_logging
+from shared.utils import setup_logging
 from shared.tools.meeting_broker.rfp_client import RfpApiClient
 from shared.tools.meeting_broker.rfp_models import (
     AdditionalInfoResponse,
@@ -28,10 +28,6 @@ from shared.tools.meeting_broker.rfp_models import (
     TeamResponse,
     UpdateQuestionsResponse,
 )
-
-if TYPE_CHECKING:
-    from langgraph.graph.state import CompiledStateGraph
-    from langgraph.checkpoint.base import BaseCheckpointSaver
 
 logger = setup_logging("meeting-broker-agent")
 
@@ -508,21 +504,18 @@ _RFP_TOOLS = [
 ]
 
 
-def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":
-    """Create and return the meeting broker agent as a compiled LangGraph.
-
-    Args:
-        checkpointer: Optional LangGraph checkpointer for persistent sessions.
-            Pass ``None`` when this agent is used as a sub-agent tool by the
-            routing supervisor (stateless single-turn calls).
-    """
+def create_agent() -> Agent:
+    """Create and return the meeting broker agent."""
     config = get_config()
-    llm = create_llm(config.gpt5_mini_deployment)
-    graph = create_react_agent(
-        llm,
-        _RFP_TOOLS,
-        state_modifier=SystemMessage(MEETING_BROKER_INSTRUCTIONS),
-        checkpointer=checkpointer,
+    agent = Agent(
+        AzureOpenAIResponsesClient(
+            project_endpoint=config.azure_ai_project_endpoint,
+            deployment_name=config.gpt5_mini_deployment,
+            credential=DefaultAzureCredential(),
+        ),
+        instructions=MEETING_BROKER_INSTRUCTIONS,
+        name="MeetingBrokerAgent",
+        tools=_RFP_TOOLS,
     )
     logger.info("Meeting broker agent created with %d RFP tools", len(_RFP_TOOLS))
-    return graph
+    return agent

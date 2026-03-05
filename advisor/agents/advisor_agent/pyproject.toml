@@ -8,6 +8,7 @@ dependencies = [
     "travel-advisor-agent",
     "meeting-broker",
     "azure-identity>=1.15",
+    "agent-framework>=1.0.0rc2",
 ]
 
 [build-system]
