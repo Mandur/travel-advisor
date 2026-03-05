@@ -1,0 +1,23 @@
+[project]
+name = "routing-agent"
+version = "0.1.0"
+description = "Routing supervisor agent — orchestrates travel and meeting domain agents"
+requires-python = ">=3.12"
+dependencies = [
+    "shared",
+    "travel-advisor-agent",
+    "meeting-broker",
+    "azure-identity>=1.15",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/advisor_agent"]
+
+[tool.uv.sources]
+shared = { workspace = true }
+travel-advisor-agent = { workspace = true }
+meeting-broker = { workspace = true }

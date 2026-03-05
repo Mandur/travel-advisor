@@ -1,0 +1,20 @@
+[project]
+name = "hack-trial"
+version = "0.1.0"
+description = "Multi-agent monorepo for Microsoft Foundry"
+requires-python = ">=3.12"
+
+[tool.uv]
+prerelease = "allow"
+
+[tool.uv.workspace]
+members = [
+    "advisor/shared",
+    "advisor/agents/meeting_broker",
+
+    "advisor/agents/advisor_agent",
+    "advisor/agents/travel_advisor_agent",
+]
+
+[tool.pyright]
+include = ["advisor"]

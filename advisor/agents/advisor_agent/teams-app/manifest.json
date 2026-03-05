@@ -1,0 +1,70 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.16",
+  "version": "1.0.0",
+  "id": "1369b48e-cc9d-43f7-891c-d846334992a8",
+
+  "packageName": "hack-trial.advisor",
+
+  "developer": {
+    "name": "Contoso",
+    "websiteUrl": "https://contoso.com",
+    "privacyUrl": "https://contoso.com/privacy",
+    "termsOfUseUrl": "https://contoso.com/terms"
+  },
+
+  "name": {
+    "short": "Travel & Meeting Advisor",
+    "full": "Hospitality Platform Advisor — Travel & Meeting"
+  },
+
+  "description": {
+    "short": "Find hotel pricing and schedule meetings.",
+    "full": "Ask the advisor to look up hotel pricing, get price forecasts, schedule meetings, and find available rooms and amenities. Powered by Azure AI Foundry."
+  },
+
+  "icons": {
+    "outline": "outline.png",
+    "color": "color.png"
+  },
+
+  "accentColor": "#0078D4",
+
+  "bots": [
+    {
+      "botId": "f85478ca-c646-48ef-8ef6-106af85fa838",
+      "scopes": ["personal", "team", "groupChat"],
+      "supportsFiles": false,
+      "isNotificationOnly": false,
+      "commandLists": [
+        {
+          "scopes": ["personal", "team", "groupChat"],
+          "commands": [
+            {
+              "title": "Hotel pricing",
+              "description": "Get pricing for a hotel (e.g. 'Prices at Hilton Paris 2026-07-01 to 2026-07-05')"
+            },
+            {
+              "title": "Price forecast",
+              "description": "Forecast hotel prices for a destination (e.g. 'Forecast for Barcelona in August')"
+            },
+            {
+              "title": "Schedule meeting",
+              "description": "Book a meeting room (e.g. 'Schedule a board meeting for 10 people next Tuesday at 2pm')"
+            },
+            {
+              "title": "Available rooms",
+              "description": "List available meeting rooms"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "permissions": ["identity", "messageTeamMembers"],
+
+  "validDomains": [
+    "*.azurecontainerapps.io"
+  ]
+}
