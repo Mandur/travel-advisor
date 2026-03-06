@@ -72,4 +72,13 @@ async def chat(req: ChatRequest, agent: AgentDep) -> ChatResponse:
 
 
 if __name__ == "__main__":
-    uvicorn.run("advisor_agent.main:app", host="0.0.0.0", port=8088, reload=False)
+    import asyncio
+    import sys
+
+    if sys.platform == "win32":
+        # psycopg requires SelectorEventLoop; Windows defaults to ProactorEventLoop which is incompatible.
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    config = uvicorn.Config("advisor_agent.main:app", host="0.0.0.0", port=8088, reload=False)
+    server = uvicorn.Server(config)
+    asyncio.run(server.serve())

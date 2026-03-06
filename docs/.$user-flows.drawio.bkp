@@ -1,0 +1,110 @@
+<mxfile host="Electron" modified="2026-03-06T00:00:00.000Z" agent="GitHub Copilot" version="21.0.0" type="device">
+  <diagram id="user-flows" name="User Flows">
+    <mxGraphModel dx="1400" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- FLOW 1 LABEL -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <mxCell id="label1" value="Flow 1 — Business Manager (Collaborative Proposal)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=12;fontColor=#1B3D5E;" vertex="1" parent="1">
+          <mxGeometry x="40" y="30" width="460" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- FLOW 1 NODES -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <mxCell id="bm1" value="Business Manager wants to work collaboratively in a Teams context" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="175" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="bm2" value="System submits to smart proposal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="320" y="80" width="165" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="bm3" value="Iterate over the proposal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="610" y="80" width="165" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="bm4" value="User submits the proposal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="900" y="80" width="165" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- FLOW 1 ARROWS -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <mxCell id="bm_e1" value="Select an interesting RFP&#xa;RFP is augmented with data from TA" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#4A7BB0;fontColor=#333333;fontSize=10;labelBackgroundColor=#f5f7fa;" edge="1" source="bm1" target="bm2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="bm_e2" value="BM starts a Teams meeting or&#xa;forwards the proposal to peers" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#4A7BB0;fontColor=#333333;fontSize=10;labelBackgroundColor=#f5f7fa;" edge="1" source="bm2" target="bm3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="bm_e3" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#4A7BB0;" edge="1" source="bm3" target="bm4" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- FLOW 2 LABEL -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <mxCell id="label2" value="Flow 2 — Hotel Manager (RFP Funnel Review)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=12;fontColor=#1B3D5E;" vertex="1" parent="1">
+          <mxGeometry x="40" y="270" width="420" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- FLOW 2 NODES -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <mxCell id="hm1" value="Hotel Manager sends a quick pre-prepped message to agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="320" width="175" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="hm2" value="Pull prioritized RFP view from Meeting Broker, augmented with data from TA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="320" y="310" width="165" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="hm3" value="Hotel Manager filters interesting leads &amp; forwards to user / group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="610" y="310" width="165" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="hm4" value="&#34;How can I assist you — we need to land this&#34;&#xa;Agent joins team discussion to assist" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="900" y="310" width="165" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- FLOW 2 ARROWS -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <mxCell id="hm_e1" value="Show me the RFP funnel today&#xa;with pricing and scoring" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#4A7BB0;fontColor=#333333;fontSize=10;labelBackgroundColor=#f5f7fa;" edge="1" source="hm1" target="hm2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="hm_e2" value="Hotel Manager filters&#xa;interesting leads" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#4A7BB0;fontColor=#333333;fontSize=10;labelBackgroundColor=#f5f7fa;" edge="1" source="hm2" target="hm3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="hm_e3" value="Forward to user / group" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#4A7BB0;fontColor=#333333;fontSize=10;labelBackgroundColor=#f5f7fa;" edge="1" source="hm3" target="hm4" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- TA SHARED SYSTEM NOTE -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <mxCell id="ta_note" value="Travel Advisor Agent (TA) enriches data in both flows" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF2FB;fontColor=#1B3D5E;strokeColor=#4A7BB0;fontSize=10;fontStyle=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="390" y="480" width="290" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ta_arrow1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeColor=#4A7BB0;dashed=1;endArrow=none;" edge="1" source="ta_note" target="bm2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ta_arrow2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeColor=#4A7BB0;dashed=1;endArrow=none;" edge="1" source="ta_note" target="hm2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,189 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.5.2 Chrome/142.0.7444.265 Electron/39.6.1 Safari/537.36" version="29.5.2">
+  <diagram id="user-flows" name="User Flows">
+    <mxGraphModel dx="2825" dy="1729" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="label1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=12;fontColor=#1B3D5E;" value="Flow 1 — Sales Manager (Collaborative Proposal)" vertex="1">
+          <mxGeometry height="30" width="460" y="27" as="geometry" />
+        </mxCell>
+        <mxCell id="bm1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" value="Sales Manager wants to work collaboratively on selected RFP" vertex="1">
+          <mxGeometry height="80" width="175" x="-3" y="78" as="geometry" />
+        </mxCell>
+        <mxCell id="bm2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" value="Users see the enriched RFP&lt;div&gt;(including score calculation)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="165" x="318" y="78" as="geometry" />
+        </mxCell>
+        <mxCell id="bm3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" value="User Adjust the proposal" vertex="1">
+          <mxGeometry height="80" width="165" x="624" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="bm4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" value="Confirmation in Teams" vertex="1">
+          <mxGeometry height="80" width="165" x="900" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="bm_e1" edge="1" parent="1" source="bm1" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#4A7BB0;fontColor=#333333;fontSize=10;labelBackgroundColor=#f5f7fa;" target="bm2" value="Enrich an interesting RFP">
+          <mxGeometry relative="1" x="-0.0389" y="14" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bm_e2" edge="1" parent="1" source="bm2" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#4A7BB0;fontColor=#333333;fontSize=10;labelBackgroundColor=#f5f7fa;" target="bm3" value="User validate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="bm_e3" edge="1" parent="1" source="bm3" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#4A7BB0;" target="bm4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-10" connectable="0" parent="bm_e3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="User validate" vertex="1">
+          <mxGeometry relative="1" x="-0.0167" y="4" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="label2" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=12;fontColor=#1B3D5E;" value="Flow 2 — Hotel Manager (RFP Funnel Review)" vertex="1">
+          <mxGeometry height="30" width="420" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="hm1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" value="Hotel Manager sends a quick pre-prepped message to agent" vertex="1">
+          <mxGeometry height="80" width="175" x="-3" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="hm2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" value="Pull prioritized RFP view from Meeting Broker, augmented with data from TA" vertex="1">
+          <mxGeometry height="100" width="165" x="320" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="hm3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" value="Hotel Manager filters interesting leads &amp; forwards to user / group" vertex="1">
+          <mxGeometry height="100" width="165" x="624" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="hm4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1B3D5E;fontColor=#ffffff;strokeColor=none;fontSize=11;fontStyle=1;arcSize=8;" value="&quot;How can I assist you — we need to land this&quot;&#xa;Agent joins team discussion to assist" vertex="1">
+          <mxGeometry height="100" width="165" x="900" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="hm_e1" edge="1" parent="1" source="hm1" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#4A7BB0;fontColor=#333333;fontSize=10;labelBackgroundColor=#f5f7fa;" target="hm2" value="Show me the RFP funnel today&#xa;with pricing and scoring">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hm_e2" edge="1" parent="1" source="hm2" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#4A7BB0;fontColor=#333333;fontSize=10;labelBackgroundColor=#f5f7fa;" target="hm3" value="Hotel Manager filters&#xa;interesting leads">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hm_e3" edge="1" parent="1" source="hm3" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#4A7BB0;fontColor=#333333;fontSize=10;labelBackgroundColor=#f5f7fa;" target="hm4" value="Forward to user / group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ta_note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF2FB;fontColor=#1B3D5E;strokeColor=#4A7BB0;fontSize=10;fontStyle=2;dashed=1;" value="Travel Advisor Agent (ATI)" vertex="1">
+          <mxGeometry height="40" width="199" x="880" y="215" as="geometry" />
+        </mxCell>
+        <mxCell id="ta_arrow1" edge="1" parent="1" source="ta_note" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;strokeColor=#4A7BB0;dashed=1;endArrow=none;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="281" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-3" connectable="0" parent="ta_arrow1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#7EA6E0;" value="TBD (&lt;span style=&quot;font-size: 10px; font-style: italic; text-wrap-mode: wrap; background-color: rgb(236, 236, 236);&quot;&gt;availability, Comp set group behaviors&lt;/span&gt;)" vertex="1">
+          <mxGeometry relative="1" x="0.4926" y="-1" as="geometry">
+            <mxPoint x="92" y="11" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ta_arrow2" edge="1" parent="1" source="ta_note" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;strokeColor=#4A7BB0;dashed=1;endArrow=none;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="489" y="235" />
+              <mxPoint x="282" y="235" />
+            </Array>
+            <mxPoint x="500" y="235" as="sourcePoint" />
+            <mxPoint x="282" y="348" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=2;dashed=1;" value="Meeting broker (MB) API" vertex="1">
+          <mxGeometry height="40" width="189" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-2" edge="1" parent="1" source="yUXVvTVVlDc224PKLGrj-1" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.994;exitY=0.138;exitDx=0;exitDy=0;strokeColor=#b85450;dashed=1;endArrow=none;fillColor=#f8cecc;exitPerimeter=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="551" y="329" as="sourcePoint" />
+            <mxPoint x="251" y="121" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-4" connectable="0" parent="yUXVvTVVlDc224PKLGrj-2" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=light-dark(#EA6B66,#EDEDED);" value="RFP Score" vertex="1">
+          <mxGeometry relative="1" x="0.2289" y="-1" as="geometry">
+            <mxPoint x="-5" y="8" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-5" edge="1" parent="1" source="bm2" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.203;exitY=0.976;exitDx=0;exitDy=0;strokeColor=#4A7BB0;fontColor=#333333;fontSize=10;labelBackgroundColor=#f5f7fa;exitPerimeter=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" target="bm2" value="Ask question / change smart&amp;nbsp;&lt;div&gt;proposal context&lt;/div&gt;">
+          <mxGeometry relative="1" x="-0.0389" y="14" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="398" y="203" />
+            </Array>
+            <mxPoint x="382" y="131" as="sourcePoint" />
+            <mxPoint x="388" y="197" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-6" edge="1" parent="1" source="bm2" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;strokeColor=#4A7BB0;fontColor=#333333;fontSize=10;labelBackgroundColor=#f5f7fa;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" target="bm2" value="Collaboratively forward/share the&lt;div&gt;&amp;nbsp;RFP information&lt;/div&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="393" y="46" />
+            </Array>
+            <mxPoint x="447" y="187" as="sourcePoint" />
+            <mxPoint x="538" y="189" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-7" edge="1" parent="1" source="yUXVvTVVlDc224PKLGrj-1" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.997;exitY=0.138;exitDx=0;exitDy=0;strokeColor=#b85450;dashed=1;endArrow=none;fillColor=#f8cecc;exitPerimeter=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="283" y="278" as="sourcePoint" />
+            <mxPoint x="544" y="123" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-9" connectable="0" parent="yUXVvTVVlDc224PKLGrj-7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#EA6B66;" value="Smart Proposal&lt;div&gt;with (mock) Price&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.8157" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-11" edge="1" parent="1" source="bm3" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.344;exitY=0.036;exitDx=0;exitDy=0;strokeColor=#4A7BB0;fontColor=#333333;fontSize=10;labelBackgroundColor=#f5f7fa;entryX=0.893;entryY=-0.011;entryDx=0;entryDy=0;entryPerimeter=0;exitPerimeter=0;" target="bm3" value="Ask for approval to manager / Collaborate">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="721" y="43" />
+            </Array>
+            <mxPoint x="471" y="124" as="sourcePoint" />
+            <mxPoint x="554" y="124" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-12" edge="1" parent="1" source="yUXVvTVVlDc224PKLGrj-1" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.996;exitY=0.157;exitDx=0;exitDy=0;strokeColor=#b85450;dashed=1;endArrow=none;fillColor=#f8cecc;exitPerimeter=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="589" y="305" as="sourcePoint" />
+            <mxPoint x="814" y="121" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-13" connectable="0" parent="yUXVvTVVlDc224PKLGrj-12" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#EA6B66;" value="Send Proposal" vertex="1">
+          <mxGeometry relative="1" x="0.8157" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=2;dashed=1;" value="&lt;div&gt;[Out of scope] Mocked delphi?&lt;/div&gt;" vertex="1">
+          <mxGeometry height="40" width="290" x="544" y="-33" as="geometry" />
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-15" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;dashed=1;endArrow=none;fillColor=#d5e8d4;entryX=0.027;entryY=0.969;entryDx=0;entryDy=0;entryPerimeter=0;" target="yUXVvTVVlDc224PKLGrj-14" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="544" y="118" as="sourcePoint" />
+            <mxPoint x="905" y="197" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-16" connectable="0" parent="yUXVvTVVlDc224PKLGrj-15" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#EA6B66;" value="&lt;font color=&quot;#67ab9f&quot;&gt;Customer information&lt;/font&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.8157" y="-1" as="geometry">
+            <mxPoint x="-5" y="29" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-17" edge="1" parent="1" source="yUXVvTVVlDc224PKLGrj-1" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.997;exitY=0.124;exitDx=0;exitDy=0;strokeColor=#b85450;dashed=1;endArrow=none;fillColor=#f8cecc;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="bm3" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="605" y="290" as="sourcePoint" />
+            <mxPoint x="961" y="202" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-18" connectable="0" parent="yUXVvTVVlDc224PKLGrj-17" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#EA6B66;" value="Changes on proposal&lt;br&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(234, 107, 102), rgb(208, 99, 95));&quot;&gt;updated in MB&lt;/span&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.8157" y="-1" as="geometry">
+            <mxPoint x="2" y="-32" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-20" edge="1" parent="1" source="yUXVvTVVlDc224PKLGrj-1" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;strokeColor=#b85450;dashed=1;endArrow=none;fillColor=#f8cecc;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="641" y="278" as="sourcePoint" />
+            <mxPoint x="250" y="364" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yUXVvTVVlDc224PKLGrj-21" connectable="0" parent="yUXVvTVVlDc224PKLGrj-20" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontColor=#EA6B66;" value="Prio RFP view" vertex="1">
+          <mxGeometry relative="1" x="0.8157" y="-1" as="geometry">
+            <mxPoint x="2" y="-32" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
