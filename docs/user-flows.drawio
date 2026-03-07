@@ -150,9 +150,9 @@
         <mxCell id="yUXVvTVVlDc224PKLGrj-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=2;dashed=1;" value="&lt;div&gt;[Out of scope] Mocked delphi?&lt;/div&gt;" vertex="1">
           <mxGeometry height="40" width="290" x="544" y="-33" as="geometry" />
         </mxCell>
-        <mxCell id="yUXVvTVVlDc224PKLGrj-15" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;dashed=1;endArrow=none;fillColor=#d5e8d4;entryX=0.027;entryY=0.969;entryDx=0;entryDy=0;entryPerimeter=0;" target="yUXVvTVVlDc224PKLGrj-14" value="">
+        <mxCell id="yUXVvTVVlDc224PKLGrj-15" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#82b366;dashed=1;endArrow=none;fillColor=#d5e8d4;entryX=0.099;entryY=0.979;entryDx=0;entryDy=0;entryPerimeter=0;" target="yUXVvTVVlDc224PKLGrj-14" value="">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="544" y="118" as="sourcePoint" />
+            <mxPoint x="573" y="118" as="sourcePoint" />
             <mxPoint x="905" y="197" as="targetPoint" />
           </mxGeometry>
         </mxCell>

@@ -5,8 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent as create_react_agent
 
 from meeting_broker.agent import create_agent as create_meeting_broker_agent
 from travel_advisor_agent.agent import create_agent as create_travel_advisor_agent
@@ -50,22 +51,30 @@ def create_agent(checkpointer: "BaseCheckpointSaver") -> "CompiledStateGraph":
     _meeting_graph = create_meeting_broker_agent()
 
     @tool
-    async def travel_advisor(query: str) -> str:
+    async def travel_advisor(query: str, config: RunnableConfig) -> str:
         """Use for questions about hotel pricing, availability, destinations, price forecasts, and travel planning."""
-        result = await _travel_graph.ainvoke({"messages": [HumanMessage(content=query)]})
-        return result["messages"][-1].content  # type: ignore[index]
+        try:
+            result = await _travel_graph.ainvoke({"messages": [HumanMessage(content=query)]}, config=config)
+            return result["messages"][-1].content  # type: ignore[index]
+        except Exception as exc:
+            logger.exception("travel_advisor tool failed")
+            return f"Travel advisor is temporarily unavailable: {exc}"
 
     @tool
-    async def meeting_broker(query: str) -> str:
+    async def meeting_broker(query: str, config: RunnableConfig) -> str:
         """Use for RFP submissions and inquiries about group meetings and events, including sourcing venue proposals, comparing conference room options, negotiating rates, and coordinating catering, AV equipment, and room setup."""
-        result = await _meeting_graph.ainvoke({"messages": [HumanMessage(content=query)]})
-        return result["messages"][-1].content  # type: ignore[index]
+        try:
+            result = await _meeting_graph.ainvoke({"messages": [HumanMessage(content=query)]}, config=config)
+            return result["messages"][-1].content  # type: ignore[index]
+        except Exception as exc:
+            logger.exception("meeting_broker tool failed")
+            return f"Meeting broker is temporarily unavailable: {exc}"
 
     supervisor_llm = create_llm(config.gpt5_2_chat_deployment)
     graph = create_react_agent(
         supervisor_llm,
         [travel_advisor, meeting_broker],
-        state_modifier=SystemMessage(SUPERVISOR_INSTRUCTIONS),
+        system_prompt=SystemMessage(SUPERVISOR_INSTRUCTIONS),
         checkpointer=checkpointer,
     )
 

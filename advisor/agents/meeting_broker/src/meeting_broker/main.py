@@ -14,7 +14,7 @@ from langgraph.graph.state import CompiledStateGraph
 from pydantic import BaseModel
 
 from shared.config import get_config
-from shared.utils import setup_logging, setup_telemetry
+from shared.utils import setup_logging, setup_telemetry, ToolLoggingCallbackHandler
 from meeting_broker.agent import create_agent
 
 logger = setup_logging("meeting-broker-agent")
@@ -61,7 +61,10 @@ async def chat(req: ChatRequest, agent: AgentDep) -> ChatResponse:
     session_id = req.session_id or str(uuid.uuid4())
     result = await agent.ainvoke(
         {"messages": [HumanMessage(content=req.message)]},
-        config={"configurable": {"thread_id": session_id}},
+        config={
+            "configurable": {"thread_id": session_id},
+            "callbacks": [ToolLoggingCallbackHandler(logger)],
+        },
     )
     reply = result["messages"][-1].content or ""
     return ChatResponse(reply=reply, session_id=session_id)

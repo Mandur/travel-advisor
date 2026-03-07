@@ -15,10 +15,10 @@ from pydantic import BaseModel
 
 from shared.config import get_config
 from shared.teams_adapter import create_teams_router
-from shared.utils import setup_logging, setup_telemetry
+from shared.utils import setup_logging, setup_telemetry, ToolLoggingCallbackHandler
 from advisor_agent.agent import create_agent
 
-logger = setup_logging("routing-agent")
+logger = setup_logging("advisor-agent")
 
 
 @asynccontextmanager
@@ -28,11 +28,11 @@ async def lifespan(app: FastAPI):
     async with AsyncPostgresSaver.from_conn_string(config.postgres_connection_string) as checkpointer:
         await checkpointer.setup()
         app.state.agent = create_agent(checkpointer=checkpointer)
-        logger.info("Routing agent ready")
+        logger.info("Advisor agent ready")
         yield
 
 
-app = FastAPI(title="Routing Agent", lifespan=lifespan)
+app = FastAPI(title="Advisor Agent", lifespan=lifespan)
 
 # Teams / Bot Service adapter — POST /api/messages
 app.include_router(create_teams_router(lambda: app.state.agent))
@@ -65,7 +65,10 @@ async def chat(req: ChatRequest, agent: AgentDep) -> ChatResponse:
     session_id = req.session_id or str(uuid.uuid4())
     result = await agent.ainvoke(
         {"messages": [HumanMessage(content=req.message)]},
-        config={"configurable": {"thread_id": session_id}},
+        config={
+            "configurable": {"thread_id": session_id},
+            "callbacks": [ToolLoggingCallbackHandler(logger)],
+        },
     )
     reply = result["messages"][-1].content or ""
     return ChatResponse(reply=reply, session_id=session_id)

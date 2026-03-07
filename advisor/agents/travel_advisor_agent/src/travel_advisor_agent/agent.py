@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from langchain_core.messages import SystemMessage
 from langchain_core.tools import tool
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent as create_react_agent
 
 from shared.config import get_config
 from shared.models import HotelPricing, PriceForecast
@@ -105,7 +105,7 @@ def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "Compiled
     graph = create_react_agent(
         llm,
         [get_hotel_pricing, get_price_forecast],
-        state_modifier=SystemMessage(TRAVEL_ADVISOR_INSTRUCTIONS),
+        system_prompt=SystemMessage(TRAVEL_ADVISOR_INSTRUCTIONS),
         checkpointer=checkpointer,
     )
     logger.info("Travel advisor agent created successfully")

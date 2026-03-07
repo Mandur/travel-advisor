@@ -1,10 +1,8 @@
 {
-  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
-  "manifestVersion": "1.16",
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.25/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.25",
   "version": "1.0.0",
   "id": "1369b48e-cc9d-43f7-891c-d846334992a8",
-
-  "packageName": "hack-trial.advisor",
 
   "developer": {
     "name": "Contoso",
@@ -15,7 +13,7 @@
 
   "name": {
     "short": "Travel & Meeting Advisor",
-    "full": "Hospitality Platform Advisor — Travel & Meeting"
+    "full": "Hospitality Platform Advisor - Travel & Meeting"
   },
 
   "description": {
@@ -29,13 +27,13 @@
   },
 
   "accentColor": "#0078D4",
+  "supportsChannelFeatures": "tier1",
 
   "bots": [
     {
       "botId": "f85478ca-c646-48ef-8ef6-106af85fa838",
       "scopes": ["personal", "team", "groupChat"],
       "supportsFiles": false,
-      "isNotificationOnly": false,
       "commandLists": [
         {
           "scopes": ["personal", "team", "groupChat"],
@@ -66,5 +64,14 @@
 
   "validDomains": [
     "*.azurecontainerapps.io"
-  ]
+  ],
+
+  "copilotAgents": {
+    "customEngineAgents": [
+      {
+        "type": "bot",
+        "id": "f85478ca-c646-48ef-8ef6-106af85fa838"
+      }
+    ]
+  }
 }

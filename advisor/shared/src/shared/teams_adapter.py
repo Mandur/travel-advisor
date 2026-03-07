@@ -22,7 +22,7 @@ from microsoft_agents.activity import load_configuration_from_env
 
 from dotenv import dotenv_values
 
-from shared.utils import setup_logging
+from shared.utils import setup_logging, ToolLoggingCallbackHandler
 from os import environ
 
 logger = setup_logging("teams-adapter")
@@ -85,10 +85,21 @@ def create_teams_router(get_agent: Callable[[], Any]) -> APIRouter:
         agent = get_agent()
         result = await agent.ainvoke(
             {"messages": [HumanMessage(content=user_text)]},
-            config={"configurable": {"thread_id": session_id}},
+            config={
+                "configurable": {"thread_id": session_id},
+                "callbacks": [ToolLoggingCallbackHandler(logger)],
+            },
         )
 
-        reply_text = result["messages"][-1].content or ""
+        raw_content = result["messages"][-1].content
+        if isinstance(raw_content, list):
+            # Responses API returns content blocks: [{"type": "output_text", "text": "..."}]
+            reply_text = "".join(
+                block.get("text", "") if isinstance(block, dict) else str(block)
+                for block in raw_content
+            )
+        else:
+            reply_text = raw_content or ""
         await context.send_activity(reply_text)
         logger.info(
             "Teams message handled: conversation=%s chars_in=%d chars_out=%d",
