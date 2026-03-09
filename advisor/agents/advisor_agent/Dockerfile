@@ -36,6 +36,8 @@ COPY --from=builder /app/.venv /app/.venv
 # Copy application code
 COPY --from=builder /app/advisor/shared/src /app/advisor/shared/src
 COPY --from=builder /app/advisor/agents/advisor_agent/src /app/advisor/agents/advisor_agent/src
+COPY --from=builder /app/advisor/agents/rfp/src /app/advisor/agents/rfp/src
+COPY --from=builder /app/advisor/agents/property_planning/src /app/advisor/agents/property_planning/src
 COPY --from=builder /app/advisor/tools/travel_advisor/src /app/advisor/tools/travel_advisor/src
 COPY --from=builder /app/advisor/tools/meeting_broker/src /app/advisor/tools/meeting_broker/src
 

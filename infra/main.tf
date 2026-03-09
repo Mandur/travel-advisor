@@ -1,11 +1,5 @@
 terraform {
-  # backend "azurerm" {
-  #   resource_group_name  = "rg-hosbi-advisor-teams-poc"
-  #   storage_account_name = "tfstateadvisorhack"
-  #   container_name       = "tfstate"
-  #   key                  = "advisor-hack.tfstate"
-  #   use_azuread_auth     = true
-  # }
+
 
   required_providers {
     azurerm = {
@@ -136,11 +130,14 @@ module "appservice" {
   managed_identity_id            = azurerm_user_assigned_identity.agents.id
   managed_identity_client_id     = azurerm_user_assigned_identity.agents.client_id
   project_endpoint               = module.foundry.project_endpoint
+  azure_openai_endpoint          = module.foundry.openai_endpoint
   postgres_connection_string     = module.postgres.connection_string
   keyvault_uri                   = module.keyvault.vault_uri
   appinsights_connection_string  = module.monitoring.application_insights_connection_string
   bot_app_id                     = azurerm_user_assigned_identity.agents.client_id
   bot_app_tenant_id              = data.azurerm_client_config.current.tenant_id
+  bearer_token                   = var.bearer_token
+  rfp_api_base_url               = var.rfp_api_base_url
   tags                           = var.tags
 }
 

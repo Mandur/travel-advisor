@@ -14,6 +14,19 @@ variable "resource_group_name" {
   type        = string
 }
 
+variable "bearer_token" {
+  description = "Bearer token for the RFP API"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "rfp_api_base_url" {
+  description = "Base URL for the RFP API"
+  type        = string
+  default     = "https://mockzilla-api-erfpmad.delightfulmoss-ca1544a1.eastus.azurecontainerapps.io/mock/rfp"
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)

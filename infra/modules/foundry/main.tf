@@ -176,3 +176,9 @@ output "project_endpoint" {
   # Format: https://<account>.cognitiveservices.azure.com/projects/<project-name>
   value = "${trimsuffix(azapi_resource.ai_foundry.output.properties.endpoint, "/")}/api/projects/${azapi_resource.ai_foundry_project.name}"
 }
+
+output "openai_endpoint" {
+  # Azure OpenAI endpoint derived from the AI Services resource name.
+  # Format: https://<name>.openai.azure.com/
+  value = "https://${azapi_resource.ai_foundry.name}.openai.azure.com/"
+}

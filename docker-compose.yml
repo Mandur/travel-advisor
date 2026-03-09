@@ -37,7 +37,7 @@ services:
       RFP_API_BASE_URL: ${RFP_API_BASE_URL:-}
 
   property-planning-agent:
-    image: hacktrial.azurecr.io/property-planning-agent:${TAG:-0.0.1}
+    image: hacktrial.azurecr.io/prop-planning-agent:${TAG:-0.0.1}
     build:
       context: .
       dockerfile: advisor/agents/property_planning/Dockerfile

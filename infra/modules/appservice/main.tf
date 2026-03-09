@@ -72,6 +72,37 @@ variable "bot_app_tenant_id" {
   default     = ""
 }
 
+variable "azure_openai_endpoint" {
+  description = "Azure OpenAI endpoint URL (https://<name>.openai.azure.com/)"
+  type        = string
+  default     = ""
+}
+
+variable "azure_openai_deployment" {
+  description = "Azure OpenAI deployment name for the large model"
+  type        = string
+  default     = "gpt-5-mini"
+}
+
+variable "azure_openai_mini_deployment" {
+  description = "Azure OpenAI deployment name for the mini model"
+  type        = string
+  default     = "gpt-5-mini"
+}
+
+variable "bearer_token" {
+  description = "Bearer token for the RFP API"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "rfp_api_base_url" {
+  description = "Base URL for the RFP API"
+  type        = string
+  default     = "https://mockzilla-api-erfpmad.delightfulmoss-ca1544a1.eastus.azurecontainerapps.io/mock/rfp"
+}
+
 variable "tags" {
   description = "Resource tags"
   type        = map(string)
@@ -89,15 +120,18 @@ locals {
   agents = [
     {
       name        = "advisor-agent"
+      app_name    = "advisor-agent"
       description = "Routes user intent to the correct downstream agent"
     },
     {
-      name        = "travel-advisor-agent"
-      description = "Surfaces hotel pricing and forecasting information"
+      name        = "rfp-agent"
+      app_name    = "rfp-agent"
+      description = "Handles RFP management and meeting broker requests"
     },
     {
-      name        = "meeting-broker-agent"
-      description = "Handles meeting scheduling and amenities requests"
+      name        = "property-planning-agent"
+      app_name    = "prop-planning-agent"
+      description = "Handles property and venue planning requests"
     }
   ]
 
@@ -121,6 +155,26 @@ locals {
     {
       name  = "APPLICATIONINSIGHTS_CONNECTION_STRING"
       value = var.appinsights_connection_string
+    },
+    {
+      name  = "AZURE_OPENAI_ENDPOINT"
+      value = var.azure_openai_endpoint
+    },
+    {
+      name  = "AZURE_OPENAI_DEPLOYMENT"
+      value = var.azure_openai_deployment
+    },
+    {
+      name  = "AZURE_OPENAI_MINI_DEPLOYMENT"
+      value = var.azure_openai_mini_deployment
+    },
+    {
+      name  = "BEARER_TOKEN"
+      value = var.bearer_token
+    },
+    {
+      name  = "RFP_API_BASE_URL"
+      value = var.rfp_api_base_url
     }
   ]
 
@@ -161,7 +215,7 @@ locals {
 resource "azurerm_container_app" "agents" {
   for_each = { for agent in local.agents : agent.name => agent }
 
-  name                = "${var.base_name}-${each.value.name}"
+  name                = "${var.base_name}-${each.value.app_name}"
   container_app_environment_id = azurerm_container_app_environment.agents.id
   resource_group_name = var.resource_group_name
   revision_mode       = "Single"

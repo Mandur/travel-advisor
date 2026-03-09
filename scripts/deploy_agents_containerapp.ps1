@@ -40,8 +40,8 @@ $ErrorActionPreference = "Continue"
 
 $agents = @(
     "advisor-agent",
-    "travel-advisor-agent",
-    "meeting-broker-agent"
+    "rfp-agent",
+    "prop-planning-agent"
 )
 
 $acrLoginServer = "$AcrName.azurecr.io"

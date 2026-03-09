@@ -44,6 +44,8 @@ resource "azurerm_postgresql_flexible_server" "this" {
   administrator_login    = "psqladmin"
   administrator_password = random_password.postgres_admin.result
 
+  zone = "1"
+
   backup_retention_days        = 7
   geo_redundant_backup_enabled = false
 
@@ -83,6 +85,6 @@ output "server_fqdn" {
 
 output "connection_string" {
   description = "PostgreSQL connection string for LangGraph checkpointer (psycopg async driver)"
-  value       = "postgresql+psycopg://psqladmin:${urlencode(random_password.postgres_admin.result)}@${azurerm_postgresql_flexible_server.this.fqdn}:5432/langgraph"
+  value       = "postgresql://psqladmin:${urlencode(random_password.postgres_admin.result)}@${azurerm_postgresql_flexible_server.this.fqdn}:5432/langgraph?sslmode=require"
   sensitive   = true
 }
