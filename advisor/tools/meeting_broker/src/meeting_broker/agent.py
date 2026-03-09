@@ -1,16 +1,14 @@
-"""Meeting broker agent — wraps the RFP API as agent tools."""
+"""Meeting broker -- wraps the RFP API as async agent tools."""
 
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-from langchain_core.messages import SystemMessage
 from langchain_core.tools import tool
-from langchain.agents import create_agent as create_react_agent
 
 from shared.config import get_config
-from shared.utils import create_llm, setup_logging
+from shared.utils import setup_logging
 from shared.tools.http_client import ApiClient
 from meeting_broker.rfp_models import (
     AdditionalInfoResponse,
@@ -29,24 +27,7 @@ from meeting_broker.rfp_models import (
     UpdateQuestionsResponse,
 )
 
-if TYPE_CHECKING:
-    from langgraph.graph.state import CompiledStateGraph
-    from langgraph.checkpoint.base import BaseCheckpointSaver
-
-logger = setup_logging("meeting-broker-agent")
-
-MEETING_BROKER_INSTRUCTIONS = """You are an RFP (Request for Proposal) management agent for a hospitality platform.
-You search, retrieve, and manage RFPs for meetings and events on behalf of the user.
-
-Your capabilities:
-- Search and filter RFPs by name, account, status, dates, milestone, and more
-- Retrieve full RFP details including questions, team, additional information, and snapshots
-- Update RFP content, status, and ownership
-- Manage RFP team members (add, update, remove)
-- Retrieve proposal providers associated with an RFP
-- Compare RFP snapshots to see what changed over time
-
-Always use the available tools to answer RFP questions accurately."""
+logger = setup_logging("meeting-broker")
 
 
 @lru_cache(maxsize=1)
@@ -59,11 +40,11 @@ def _client() -> ApiClient:
     )
 
 
-# ── Search & retrieve ─────────────────────────────────────────────────────────
+# -- Search & retrieve --------------------------------------------------------
 
 
 @tool
-def search_rfps(
+async def search_rfps(
     meeting_name: str | None = None,
     account_name: str | None = None,
     status: str | None = None,
@@ -83,10 +64,10 @@ def search_rfps(
     continuation_token: str | None = None,
     is_next_step_overdue: bool | None = None,
     is_export: bool | None = None,
-) -> SearchRfpResponse:
+) -> dict[str, Any]:
     """Search and retrieve a list of RFPs matching the supplied filters.
 
-    All parameters are optional — omit any you do not need.
+    All parameters are optional -- omit any you do not need.
 
     Args:
         meeting_name: Partial name of the meeting to search for.
@@ -110,9 +91,9 @@ def search_rfps(
         is_export: Set to True when exporting results to a file.
 
     Returns:
-        Typed SearchRfpResponse with a list of RFP summaries and total count.
+        Dict with a list of RFP summaries and total count.
     """
-    raw = _client().get(
+    raw = await _client().get(
         "/rfps",
         params={
             "meetingName": meeting_name,
@@ -136,11 +117,11 @@ def search_rfps(
             "isExport": is_export,
         },
     )
-    return SearchRfpResponse.model_validate(raw)
+    return SearchRfpResponse.model_validate(raw).model_dump()
 
 
 @tool
-def get_rfp(rfp_id: str, children: str | None = None) -> GetRfpResponse:
+async def get_rfp(rfp_id: str, children: str | None = None) -> dict[str, Any]:
     """Retrieve full details for a single RFP by its GUID.
 
     Args:
@@ -148,19 +129,19 @@ def get_rfp(rfp_id: str, children: str | None = None) -> GetRfpResponse:
         children: Comma-separated list of child nodes to include (e.g. "questions,team").
 
     Returns:
-        Typed GetRfpResponse with the full RFP detail object.
+        Dict with the full RFP detail object.
     """
-    raw = _client().get(f"/rfps/{rfp_id}", params={"children": children})
-    return GetRfpResponse.model_validate(raw)
+    raw = await _client().get(f"/rfps/{rfp_id}", params={"children": children})
+    return GetRfpResponse.model_validate(raw).model_dump()
 
 
 @tool
-def get_rfp_status_counts(
+async def get_rfp_status_counts(
     start_date: str | None = None,
     end_date: str | None = None,
     statuses: str | None = None,
     location_ids: str | None = None,
-) -> StatusCountsResponse:
+) -> dict[str, Any]:
     """Retrieve the count of RFPs grouped by status for a date range.
 
     Args:
@@ -170,9 +151,9 @@ def get_rfp_status_counts(
         location_ids: Comma-delimited list of location IDs to restrict counts to.
 
     Returns:
-        Typed StatusCountsResponse with per-status counts.
+        Dict with per-status counts.
     """
-    raw = _client().get(
+    raw = await _client().get(
         "/rfps/status-counts",
         params={
             "startDate": start_date,
@@ -181,17 +162,17 @@ def get_rfp_status_counts(
             "locationIds": location_ids,
         },
     )
-    return StatusCountsResponse.model_validate(raw)
+    return StatusCountsResponse.model_validate(raw).model_dump()
 
 
 @tool
-def get_rfp_status_revenues(
+async def get_rfp_status_revenues(
     start_date: str | None = None,
     end_date: str | None = None,
     statuses: str | None = None,
     is_actual: bool | None = None,
     location_ids: str | None = None,
-) -> StatusRevenueResponse:
+) -> dict[str, Any]:
     """Retrieve RFP revenue figures grouped by status for a date range.
 
     Args:
@@ -202,9 +183,9 @@ def get_rfp_status_revenues(
         location_ids: Comma-delimited list of location IDs to filter by.
 
     Returns:
-        Typed StatusRevenueResponse with revenue per status.
+        Dict with revenue per status.
     """
-    raw = _client().get(
+    raw = await _client().get(
         "/rfps/status-revenues",
         params={
             "startDate": start_date,
@@ -214,43 +195,43 @@ def get_rfp_status_revenues(
             "locationIds": location_ids,
         },
     )
-    return StatusRevenueResponse.model_validate(raw)
+    return StatusRevenueResponse.model_validate(raw).model_dump()
 
 
 @tool
-def get_rfp_questions(rfp_id: str) -> QuestionsResponse:
+async def get_rfp_questions(rfp_id: str) -> dict[str, Any]:
     """Retrieve the questions and answers associated with an RFP.
 
     Args:
         rfp_id: UUID of the RFP.
 
     Returns:
-        Typed QuestionsResponse with the list of questions and their answers.
+        Dict with the list of questions and their answers.
     """
-    raw = _client().get(f"/rfps/{rfp_id}/questions")
-    return QuestionsResponse.model_validate(raw)
+    raw = await _client().get(f"/rfps/{rfp_id}/questions")
+    return QuestionsResponse.model_validate(raw).model_dump()
 
 
 @tool
-def get_rfp_additional_information(rfp_id: str) -> AdditionalInfoResponse:
+async def get_rfp_additional_information(rfp_id: str) -> dict[str, Any]:
     """Retrieve the additional information fields attached to an RFP.
 
     Args:
         rfp_id: UUID of the RFP.
 
     Returns:
-        Typed AdditionalInfoResponse with extra key/value fields.
+        Dict with extra key/value fields.
     """
-    raw = _client().get(f"/rfps/{rfp_id}/additional-information")
-    return AdditionalInfoResponse.model_validate(raw)
+    raw = await _client().get(f"/rfps/{rfp_id}/additional-information")
+    return AdditionalInfoResponse.model_validate(raw).model_dump()
 
 
 @tool
-def get_rfp_team(
+async def get_rfp_team(
     rfp_id: str,
     limit: int | None = None,
     continuation_token: str | None = None,
-) -> TeamResponse:
+) -> dict[str, Any]:
     """Retrieve the team members assigned to an RFP.
 
     Args:
@@ -259,108 +240,97 @@ def get_rfp_team(
         continuation_token: Token for the next page of results.
 
     Returns:
-        Typed TeamResponse with team members and total count.
+        Dict with team members and total count.
     """
-    raw = _client().get(
+    raw = await _client().get(
         f"/rfps/{rfp_id}/team",
         params={"limit": limit, "continuationToken": continuation_token},
     )
-    return TeamResponse.model_validate(raw)
+    return TeamResponse.model_validate(raw).model_dump()
 
 
 @tool
-def get_rfp_proposal_providers(rfp_id: str, channel_id: int | None = None) -> ProposalProvidersResponse:
+async def get_rfp_proposal_providers(rfp_id: str, channel_id: int | None = None) -> dict[str, Any]:
     """Retrieve the list of proposal providers associated with an RFP.
 
     Args:
         rfp_id: UUID of the RFP.
-        channel_id: Optional channel integer ID; when provided the response
-            includes the actual third-party proposal URL for that channel.
+        channel_id: Optional channel integer ID.
 
     Returns:
-        Typed ProposalProvidersResponse with the provider list.
+        Dict with the provider list.
     """
-    raw = _client().get(
+    raw = await _client().get(
         f"/rfps/{rfp_id}/proposal-providers",
         params={"channelId": channel_id},
     )
-    return ProposalProvidersResponse.model_validate(raw)
+    return ProposalProvidersResponse.model_validate(raw).model_dump()
 
 
 @tool
-def get_rfp_snapshots(rfp_id: str) -> SnapshotsResponse:
+async def get_rfp_snapshots(rfp_id: str) -> dict[str, Any]:
     """Retrieve the list of available snapshots (historical versions) for an RFP.
 
     Args:
         rfp_id: UUID of the RFP.
 
     Returns:
-        Typed SnapshotsResponse with snapshot IDs and version labels.
+        Dict with snapshot IDs and version labels.
     """
-    raw = _client().get(f"/rfps/{rfp_id}/snapshots")
-    return SnapshotsResponse.model_validate(raw)
+    raw = await _client().get(f"/rfps/{rfp_id}/snapshots")
+    return SnapshotsResponse.model_validate(raw).model_dump()
 
 
 @tool
-def get_rfp_snapshot_details(rfp_id: str, snapshot_id: int | None = None) -> SnapshotDetailsResponse:
+async def get_rfp_snapshot_details(rfp_id: str, snapshot_id: int | None = None) -> dict[str, Any]:
     """Compare an RFP snapshot against the current version field-by-field.
 
     Args:
         rfp_id: UUID of the RFP.
-        snapshot_id: Integer ID of the snapshot to compare.  Use
-            ``get_rfp_snapshots`` to discover available snapshot IDs.
+        snapshot_id: Integer ID of the snapshot to compare.
 
     Returns:
-        Typed SnapshotDetailsResponse with sections of changed fields.
+        Dict with sections of changed fields.
     """
-    raw = _client().get(
+    raw = await _client().get(
         f"/rfps/{rfp_id}/compare-side-by-side",
         params={"snapshotId": snapshot_id},
     )
-    return SnapshotDetailsResponse.model_validate(raw)
+    return SnapshotDetailsResponse.model_validate(raw).model_dump()
 
 
-# ── Write operations ──────────────────────────────────────────────────────────
+# -- Write operations ---------------------------------------------------------
 
 
 @tool
-def update_rfp(rfp_id: str, rfp_details: dict[str, Any]) -> NoContentResponse:
+async def update_rfp(rfp_id: str, rfp_details: dict[str, Any]) -> dict[str, Any]:
     """Update the content of an existing RFP.
 
-    Provide only the fields you want to change inside ``rfp_details``.
-    The object is sent as ``{"data": rfp_details}`` to the API.
-
-    Example ``rfp_details``::
-
-        {
-            "id": "<rfp-guid>",
-            "meeting": {"name": "New meeting title"},
-            "channel": {"id": "<channel-guid>"}
-        }
+    Provide only the fields you want to change inside rfp_details.
 
     Args:
         rfp_id: UUID of the RFP to update.
         rfp_details: Partial or full RfpDetails object to apply.
 
     Returns:
-        NoContentResponse with ``success: True`` on success.
+        Dict with success status.
     """
-    _client().put(f"/rfps/{rfp_id}", json={"data": rfp_details})
-    return NoContentResponse()
+    await _client().put(f"/rfps/{rfp_id}", json={"data": rfp_details})
+    return NoContentResponse().model_dump()
 
 
 @tool
-def update_rfp_status(
+async def update_rfp_status(
     rfp_id: str,
     status: str,
     comment: str | None = None,
     start_date: str | None = None,
     reason_id: str | None = None,
-) -> PutResponse:
+) -> dict[str, Any]:
     """Change the status of an RFP and optionally record business data.
 
-    Valid status values include: ``New``, ``Declined``, ``Awarded``,
-    ``TurnedDown``, ``Cancelled``, ``Responded``, ``Viewed``, ``Published``.
+    Valid status values: New, Declined, Awarded, TurnedDown, Cancelled,
+    Responded, Viewed, Published.
 
     Args:
         rfp_id: UUID of the RFP.
@@ -370,7 +340,7 @@ def update_rfp_status(
         reason_id: Optional lost-business reason ID.
 
     Returns:
-        Typed PutResponse with a reference to the updated RFP.
+        Dict with a reference to the updated RFP.
     """
     body: dict[str, Any] = {
         "data": {
@@ -382,64 +352,49 @@ def update_rfp_status(
             }
         }
     }
-    raw = _client().put(f"/rfps/{rfp_id}/status", json=body)
-    return PutResponse.model_validate(raw)
+    raw = await _client().put(f"/rfps/{rfp_id}/status", json=body)
+    return PutResponse.model_validate(raw).model_dump()
 
 
 @tool
-def reassign_rfp_owner(rfp_id: str, new_owner: dict[str, Any]) -> PutResponse:
+async def reassign_rfp_owner(rfp_id: str, new_owner: dict[str, Any]) -> dict[str, Any]:
     """Reassign the owner of an RFP.
-
-    ``new_owner`` should contain at minimum the new owner's ``id`` (UUID).
-    Example::
-
-        {"id": "<user-guid>"}
 
     Args:
         rfp_id: UUID of the RFP.
-        new_owner: PersonSummary object identifying the new owner.
+        new_owner: PersonSummary object identifying the new owner (must include "id").
 
     Returns:
-        Typed PutResponse with a reference to the updated RFP.
+        Dict with a reference to the updated RFP.
     """
-    raw = _client().put(f"/rfps/{rfp_id}/owner", json={"data": {"owner": new_owner}})
-    return PutResponse.model_validate(raw)
+    raw = await _client().put(f"/rfps/{rfp_id}/owner", json={"data": {"owner": new_owner}})
+    return PutResponse.model_validate(raw).model_dump()
 
 
 @tool
-def update_rfp_question_answers(rfp_id: str, questions: list[dict[str, Any]]) -> UpdateQuestionsResponse:
+async def update_rfp_question_answers(rfp_id: str, questions: list[dict[str, Any]]) -> dict[str, Any]:
     """Update the answers to one or more questions on an RFP.
-
-    Each entry in ``questions`` should follow the Question schema.
-    Provide either ``answer.responseText`` or ``answer.responses``::
-
-        [
-            {
-                "id": "<question-id>",
-                "answer": {"responseText": "Our answer here"}
-            }
-        ]
 
     Args:
         rfp_id: UUID of the RFP.
         questions: List of question objects with updated answers.
 
     Returns:
-        Typed UpdateQuestionsResponse with the updated question list.
+        Dict with the updated question list.
     """
-    raw = _client().put(
+    raw = await _client().put(
         f"/rfps/{rfp_id}/questions/answers",
         json={"data": {"questions": questions}},
     )
-    return UpdateQuestionsResponse.model_validate(raw)
+    return UpdateQuestionsResponse.model_validate(raw).model_dump()
 
 
 @tool
-def add_rfp_team_member(
+async def add_rfp_team_member(
     rfp_id: str,
     user_id: str,
     role_id: str | None = None,
-) -> TeamMemberResponse:
+) -> dict[str, Any]:
     """Add a member to the RFP team.
 
     Args:
@@ -448,35 +403,32 @@ def add_rfp_team_member(
         role_id: Optional UUID of the role to assign to the new member.
 
     Returns:
-        Typed TeamMemberResponse with the new team member's ID.
+        Dict with the new team member ID.
     """
     member: dict[str, Any] = {"person": {"id": user_id}}
     if role_id is not None:
         member["role"] = {"id": role_id}
-    raw = _client().post(f"/rfps/{rfp_id}/team/members", json={"data": member})
-    return TeamMemberResponse.model_validate(raw)
+    raw = await _client().post(f"/rfps/{rfp_id}/team/members", json={"data": member})
+    return TeamMemberResponse.model_validate(raw).model_dump()
 
 
 @tool
-def update_rfp_team_members(rfp_id: str, members: list[dict[str, Any]]) -> NoContentResponse:
+async def update_rfp_team_members(rfp_id: str, members: list[dict[str, Any]]) -> dict[str, Any]:
     """Update the team members of an RFP in bulk.
-
-    Each entry should contain ``person``, ``assignmentMethod``, and ``role``
-    fields mirroring the TeamMember schema.
 
     Args:
         rfp_id: UUID of the RFP.
         members: List of TeamMember objects with updated values.
 
     Returns:
-        NoContentResponse with ``success: True`` on success.
+        Dict with success status.
     """
-    _client().put(f"/rfps/{rfp_id}/team/members", json={"data": members})
-    return NoContentResponse()
+    await _client().put(f"/rfps/{rfp_id}/team/members", json={"data": members})
+    return NoContentResponse().model_dump()
 
 
 @tool
-def remove_rfp_team_member(rfp_id: str, user_id: str) -> NoContentResponse:
+async def remove_rfp_team_member(rfp_id: str, user_id: str) -> dict[str, Any]:
     """Remove a member from the RFP team.
 
     Args:
@@ -484,50 +436,18 @@ def remove_rfp_team_member(rfp_id: str, user_id: str) -> NoContentResponse:
         user_id: UUID of the team member to remove.
 
     Returns:
-        NoContentResponse with ``success: True`` on success.
+        Dict with success status.
     """
-    _client().delete(f"/rfps/{rfp_id}/team/members/{user_id}")
-    return NoContentResponse()
+    await _client().delete(f"/rfps/{rfp_id}/team/members/{user_id}")
+    return NoContentResponse().model_dump()
 
 
-# ── Agent factory ─────────────────────────────────────────────────────────────
+# -- Tool list for agents -----------------------------------------------------
 
 _RFP_TOOLS = [
     search_rfps,
     get_rfp,
-    get_rfp_status_counts,
-    get_rfp_status_revenues,
-    get_rfp_questions,
     get_rfp_additional_information,
-    get_rfp_team,
-    get_rfp_proposal_providers,
-    get_rfp_snapshots,
-    get_rfp_snapshot_details,
     update_rfp,
     update_rfp_status,
-    reassign_rfp_owner,
-    update_rfp_question_answers,
-    add_rfp_team_member,
-    update_rfp_team_members,
-    remove_rfp_team_member,
 ]
-
-
-def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":
-    """Create and return the meeting broker agent as a compiled LangGraph.
-
-    Args:
-        checkpointer: Optional LangGraph checkpointer for persistent sessions.
-            Pass ``None`` when this agent is used as a sub-agent tool by the
-            routing supervisor (stateless single-turn calls).
-    """
-    config = get_config()
-    llm = create_llm(config.gpt5_mini_deployment)
-    graph = create_react_agent(
-        llm,
-        _RFP_TOOLS,
-        system_prompt=SystemMessage(MEETING_BROKER_INSTRUCTIONS),
-        checkpointer=checkpointer,
-    )
-    logger.info("Meeting broker agent created with %d RFP tools", len(_RFP_TOOLS))
-    return graph

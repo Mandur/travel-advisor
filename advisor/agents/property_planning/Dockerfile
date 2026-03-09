@@ -14,10 +14,10 @@ COPY pyproject.toml uv.lock .python-version ./
 COPY advisor/shared/ advisor/shared/
 
 # Copy this agent
-COPY advisor/agents/meeting_broker_agent/ advisor/agents/meeting_broker_agent/
+COPY advisor/agents/property_planning/ advisor/agents/property_planning/
 
 # Install dependencies for this specific agent
-RUN uv sync --package meeting-broker-agent --no-dev --frozen
+RUN uv sync --package property-planning-agent --no-dev --frozen
 
 # --- Stage 2: Runtime ---
 FROM python:3.12-slim
@@ -29,7 +29,7 @@ COPY --from=builder /app/.venv /app/.venv
 
 # Copy application code
 COPY --from=builder /app/advisor/shared/src /app/advisor/shared/src
-COPY --from=builder /app/advisor/agents/meeting_broker_agent/src /app/advisor/agents/meeting_broker_agent/src
+COPY --from=builder /app/advisor/agents/property_planning/src /app/advisor/agents/property_planning/src
 
 # Add venv to PATH
 ENV PATH="/app/.venv/bin:$PATH"
@@ -39,4 +39,4 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Foundry requires port 8088
 EXPOSE 8088
 
-CMD ["python", "-m", "meeting_broker_agent.main"]
+CMD ["python", "-m", "property_planning.main"]

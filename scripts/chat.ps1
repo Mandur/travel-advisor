@@ -1,22 +1,22 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-    Interactive chat REPL for the routing agent.
+    Interactive chat REPL for the advisor agent.
 
 .DESCRIPTION
-    Starts a conversation loop against the routing agent's /chat endpoint.
+    Starts a conversation loop against the advisor agent's /chat endpoint.
     Type your message and press Enter to send. Use 'exit' or 'quit' to leave,
     '/new' to start a fresh session, or '/help' for command reference.
 
 .PARAMETER Url
-    Base URL of the routing agent. Defaults to http://localhost:8088 (docker-compose).
+    Base URL of the advisor agent. Defaults to http://localhost:8088 (docker-compose).
 
 .PARAMETER SessionId
     Resume an existing session by providing its ID. A new UUID is generated when omitted.
 
 .EXAMPLE
     .\scripts\chat.ps1
-    .\scripts\chat.ps1 -Url https://routing-agent.yourapp.azurecontainerapps.io
+    .\scripts\chat.ps1 -Url https://advisor-agent.yourapp.azurecontainerapps.io
     .\scripts\chat.ps1 -SessionId "my-test-session"
 #>
 param(
@@ -36,7 +36,7 @@ function Write-Banner {
     $border = "─" * $width
     Write-Host ""
     Write-Host "  ┌$border┐" -ForegroundColor Cyan
-    Write-Host "  │$((" " * [int](($width - 20) / 2)))Routing Agent Chat$((" " * [int][Math]::Ceiling(($width - 20) / 2)))│" -ForegroundColor Cyan
+    Write-Host "  │$((" " * [int](($width - 20) / 2)))Advisor Agent Chat$((" " * [int][Math]::Ceiling(($width - 20) / 2)))│" -ForegroundColor Cyan
     Write-Host "  └$border┘" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  Endpoint : $Url" -ForegroundColor DarkGray
@@ -73,7 +73,7 @@ function Assert-AgentReachable([string]$BaseUrl) {
     }
     catch {
         Write-Host ""
-        Write-Host "  ✘  Cannot reach routing agent at $BaseUrl" -ForegroundColor Red
+        Write-Host "  ✘  Cannot reach advisor agent at $BaseUrl" -ForegroundColor Red
         Write-Host "     Make sure docker-compose is running:  docker-compose up" -ForegroundColor DarkRed
         Write-Host "     Or pass a different URL:  .\scripts\chat.ps1 -Url <url>" -ForegroundColor DarkRed
         Write-Host ""

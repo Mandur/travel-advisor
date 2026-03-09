@@ -155,7 +155,7 @@ module "bot" {
 
   base_name                  = var.base_name
   resource_group_name        = azurerm_resource_group.main.name
-  advisor_agent_fqdn         = module.appservice.container_app_urls["routing-agent"]
+  advisor_agent_fqdn         = module.appservice.container_app_urls["advisor-agent"]
   managed_identity_id        = azurerm_user_assigned_identity.agents.id
   managed_identity_client_id = azurerm_user_assigned_identity.agents.client_id
   tenant_id                  = data.azurerm_client_config.current.tenant_id

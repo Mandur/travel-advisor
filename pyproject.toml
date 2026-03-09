@@ -10,10 +10,11 @@ prerelease = "allow"
 [tool.uv.workspace]
 members = [
     "advisor/shared",
-    "advisor/agents/meeting_broker",
-
+    "advisor/tools/meeting_broker",
+    "advisor/tools/travel_advisor",
     "advisor/agents/advisor_agent",
-    "advisor/agents/travel_advisor_agent",
+    "advisor/agents/rfp",
+    "advisor/agents/property_planning",
 ]
 
 [tool.pyright]

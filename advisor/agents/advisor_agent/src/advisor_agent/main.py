@@ -1,87 +1,9 @@
 """Entrypoint for the routing agent exposed via FastAPI."""
 
-from __future__ import annotations
-
-import uuid
-from contextlib import asynccontextmanager
-from typing import Annotated
-
-import uvicorn
-from fastapi import Depends, FastAPI, Request
-from langchain_core.messages import HumanMessage
-from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-from langgraph.graph.state import CompiledStateGraph
-from pydantic import BaseModel
-
-from shared.config import get_config
-from shared.teams_adapter import create_teams_router
-from shared.utils import setup_logging, setup_telemetry, ToolLoggingCallbackHandler
+from shared.app_factory import create_app, run_app
 from advisor_agent.agent import create_agent
 
-logger = setup_logging("advisor-agent")
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    config = get_config()
-    setup_telemetry(config.application_insights_connection_string)
-    async with AsyncPostgresSaver.from_conn_string(config.postgres_connection_string) as checkpointer:
-        await checkpointer.setup()
-        app.state.agent = create_agent(checkpointer=checkpointer)
-        logger.info("Advisor agent ready")
-        yield
-
-
-app = FastAPI(title="Advisor Agent", lifespan=lifespan)
-
-# Teams / Bot Service adapter — POST /api/messages
-app.include_router(create_teams_router(lambda: app.state.agent))
-
-
-def get_agent(request: Request) -> CompiledStateGraph:
-    return request.app.state.agent
-
-
-AgentDep = Annotated[CompiledStateGraph, Depends(get_agent)]
-
-
-class ChatRequest(BaseModel):
-    message: str
-    session_id: str | None = None
-
-
-class ChatResponse(BaseModel):
-    reply: str
-    session_id: str
-
-
-@app.get("/health")
-async def health() -> dict:
-    return {"status": "ok"}
-
-
-@app.post("/chat", response_model=ChatResponse)
-async def chat(req: ChatRequest, agent: AgentDep) -> ChatResponse:
-    session_id = req.session_id or str(uuid.uuid4())
-    result = await agent.ainvoke(
-        {"messages": [HumanMessage(content=req.message)]},
-        config={
-            "configurable": {"thread_id": session_id},
-            "callbacks": [ToolLoggingCallbackHandler(logger)],
-        },
-    )
-    reply = result["messages"][-1].content or ""
-    return ChatResponse(reply=reply, session_id=session_id)
-
+app = create_app("Advisor Agent", create_agent, include_teams=True)
 
 if __name__ == "__main__":
-    import asyncio
-    import sys
-
-    if sys.platform == "win32":
-        # psycopg requires SelectorEventLoop; Windows defaults to ProactorEventLoop which is incompatible.
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
-    config = uvicorn.Config("advisor_agent.main:app", host="0.0.0.0", port=8088, reload=False)
-    server = uvicorn.Server(config)
-    asyncio.run(server.serve())
+    run_app("advisor_agent.main:app")

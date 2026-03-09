@@ -5,9 +5,8 @@ from __future__ import annotations
 from datetime import date
 from typing import TYPE_CHECKING
 
-from langchain_core.messages import SystemMessage
+from langchain.agents import create_agent as _build_agent
 from langchain_core.tools import tool
-from langchain.agents import create_agent as create_react_agent
 
 from shared.config import get_config
 from shared.models import HotelPricing, PriceForecast
@@ -19,13 +18,9 @@ if TYPE_CHECKING:
 
 logger = setup_logging("travel-advisor-agent")
 
-TRAVEL_ADVISOR_INSTRUCTIONS = """You are a travel advisor agent for a hospitality platform.
+TRAVEL_ADVISOR_INSTRUCTIONS = """\
+You are a travel advisor agent for a hospitality platform.
 You help users find hotel pricing information and provide price forecasts.
-
-Your capabilities:
-- Look up current hotel pricing and availability
-- Provide price forecasts and trends for destinations
-- Compare options across different dates and locations
 
 Use the available tools to retrieve pricing data and forecasts.
 Always present information clearly with prices, dates, and availability status."""
@@ -53,7 +48,7 @@ def get_hotel_pricing(
     check_out_date = date.fromisoformat(check_out)
     nights = (check_out_date - check_in_date).days
 
-    # Placeholder — replace with actual pricing API integration
+    # Placeholder -- replace with actual pricing API integration
     price_per_night = 150.0
     pricing = HotelPricing(
         hotel_name=hotel_name,
@@ -93,19 +88,13 @@ def get_price_forecast(
 
 
 def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":
-    """Create and return the travel advisor agent as a compiled LangGraph.
-
-    Args:
-        checkpointer: Optional LangGraph checkpointer for persistent sessions.
-            Pass ``None`` when this agent is used as a sub-agent tool by the
-            routing supervisor (stateless single-turn calls).
-    """
+    """Create and return the travel advisor agent as a compiled LangGraph."""
     config = get_config()
     llm = create_llm(config.gpt5_mini_deployment)
-    graph = create_react_agent(
+    graph = _build_agent(
         llm,
         [get_hotel_pricing, get_price_forecast],
-        system_prompt=SystemMessage(TRAVEL_ADVISOR_INSTRUCTIONS),
+        system_prompt=TRAVEL_ADVISOR_INSTRUCTIONS,
         checkpointer=checkpointer,
     )
     logger.info("Travel advisor agent created successfully")

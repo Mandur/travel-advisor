@@ -13,7 +13,7 @@ variable "resource_group_name" {
 }
 
 variable "advisor_agent_fqdn" {
-  description = "FQDN of the routing-agent Container App (without scheme)"
+  description = "FQDN of the advisor-agent Container App (without scheme)"
   type        = string
 }
 
@@ -58,7 +58,7 @@ resource "azurerm_bot_service_azure_bot" "main" {
 
   sku = "S1"
 
-  # The messaging endpoint is the routing-agent Container App's /api/messages
+  # The messaging endpoint is the advisor-agent Container App's /api/messages
   # route, served over HTTPS via the Container Apps ingress TLS termination.
   endpoint = "https://${var.advisor_agent_fqdn}/api/messages"
 

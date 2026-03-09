@@ -91,7 +91,7 @@ function Test-HttpHealth([string]$Label, [string]$Url) {
 
 if ($Mode -eq "auto") {
     $dockerRunning = docker ps --format "{{.Names}}" 2>$null |
-        Where-Object { $_ -match "routing-agent|travel-advisor|meeting-broker" }
+        Where-Object { $_ -match "advisor-agent|travel-advisor|meeting-broker" }
     $Mode = if ($dockerRunning) { "local" } else { "azure" }
     Info "Auto-detected mode: $Mode"
 }
@@ -133,7 +133,7 @@ if ($Mode -eq "local") {
     Write-Header "Docker Containers"
 
     $expectedContainers = @{
-        "routing-agent"       = 8088
+        "advisor-agent"       = 8088
         "travel-advisor-agent" = 8089
         "meeting-broker-agent" = 8090
     }
@@ -243,7 +243,7 @@ if ($Mode -eq "azure") {
     if ($acr) {
         Pass "ACR '$($acr.name)' found  (loginServer: $($acr.loginServer))"
         $repos = az acr repository list --name $acrName -o tsv 2>$null
-        $expectedImages = @("routing-agent", "travel-advisor-agent", "meeting-broker-agent")
+        $expectedImages = @("advisor-agent", "travel-advisor-agent", "meeting-broker-agent")
         foreach ($img in $expectedImages) {
             if ($repos -match $img) {
                 $tag = az acr repository show-tags --name $acrName --repository $img --orderby time_desc 2>$null |
@@ -298,7 +298,7 @@ if ($Mode -eq "azure") {
     if (-not $apps) {
         Fail "No Container Apps found in resource group '$ResourceGroup'"
     } else {
-        $expectedApps = @("routing-agent", "travel-advisor-agent", "meeting-broker-agent")
+        $expectedApps = @("advisor-agent", "travel-advisor-agent", "meeting-broker-agent")
         foreach ($appName in $expectedApps) {
             $fullName = "$BaseName-$appName"
             $app = $apps | Where-Object { $_.name -eq $fullName }
@@ -319,7 +319,7 @@ if ($Mode -eq "azure") {
     # --- Health Endpoints (Azure) ---
     Write-Header "Health Endpoints (Azure)"
 
-    foreach ($appName in @("routing-agent", "travel-advisor-agent", "meeting-broker-agent")) {
+    foreach ($appName in @("advisor-agent", "travel-advisor-agent", "meeting-broker-agent")) {
         $fullName = "$BaseName-$appName"
         $app = $apps | Where-Object { $_.name -eq $fullName }
         if (-not $app) { continue }

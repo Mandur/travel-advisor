@@ -22,7 +22,7 @@ from microsoft_agents.activity import load_configuration_from_env
 
 from dotenv import dotenv_values
 
-from shared.utils import setup_logging, ToolLoggingCallbackHandler
+from shared.utils import setup_logging, LLMLoggingCallbackHandler, ToolLoggingCallbackHandler
 from os import environ
 
 logger = setup_logging("teams-adapter")
@@ -87,7 +87,7 @@ def create_teams_router(get_agent: Callable[[], Any]) -> APIRouter:
             {"messages": [HumanMessage(content=user_text)]},
             config={
                 "configurable": {"thread_id": session_id},
-                "callbacks": [ToolLoggingCallbackHandler(logger)],
+                "callbacks": [ToolLoggingCallbackHandler(logger), LLMLoggingCallbackHandler()],
             },
         )
 

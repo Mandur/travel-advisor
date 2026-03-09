@@ -61,13 +61,13 @@ variable "appinsights_connection_string" {
 }
 
 variable "bot_app_id" {
-  description = "Microsoft App ID (managed identity client_id) injected into the routing-agent for Bot Framework auth"
+  description = "Microsoft App ID (managed identity client_id) injected into the advisor-agent for Bot Framework auth"
   type        = string
   default     = ""
 }
 
 variable "bot_app_tenant_id" {
-  description = "Azure AD tenant ID injected into the routing-agent for Bot Framework auth"
+  description = "Azure AD tenant ID injected into the advisor-agent for Bot Framework auth"
   type        = string
   default     = ""
 }
@@ -88,7 +88,7 @@ resource "azurerm_container_app_environment" "agents" {
 locals {
   agents = [
     {
-      name        = "routing-agent"
+      name        = "advisor-agent"
       description = "Routes user intent to the correct downstream agent"
     },
     {
@@ -124,11 +124,11 @@ locals {
     }
   ]
 
-  # Extra env vars injected only into the routing-agent for Bot Framework / Teams
+  # Extra env vars injected only into the advisor-agent for Bot Framework / Teams
   # auth. The CloudAdapter reads these at startup to validate incoming JWT tokens
   # from Azure Bot Service.
   bot_env_vars = {
-    "routing-agent" = [
+    "advisor-agent" = [
       {
         name  = "MICROSOFT_APP_ID"
         value = var.bot_app_id

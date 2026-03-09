@@ -19,7 +19,7 @@ dependencies = [
     "psycopg[binary,pool]",
     "aiohttp>=3.9",
     "uvicorn>=0.30",
-    # Microsoft 365 Agents SDK — Teams / Bot Service adapter (routing-agent only)
+    # Microsoft 365 Agents SDK — Teams / Bot Service adapter (advisor-agent only)
     "microsoft-agents-hosting-core>=0.8.0",
     "microsoft-agents-hosting-fastapi>=0.8.0",
     "microsoft-agents-authentication-msal>=0.8.0",

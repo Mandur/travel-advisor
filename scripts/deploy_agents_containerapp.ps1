@@ -39,7 +39,7 @@ param(
 $ErrorActionPreference = "Continue"
 
 $agents = @(
-    "routing-agent",
+    "advisor-agent",
     "travel-advisor-agent",
     "meeting-broker-agent"
 )

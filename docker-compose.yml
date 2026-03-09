@@ -1,6 +1,6 @@
 services:
-  routing-agent:
-    image: hacktrial.azurecr.io/routing-agent:${TAG:-0.0.1}
+  advisor-agent:
+    image: hacktrial.azurecr.io/advisor-agent:${TAG:-0.0.1}
     build:
       context: .
       dockerfile: advisor/agents/advisor_agent/Dockerfile
@@ -8,32 +8,45 @@ services:
       - "8088:8088"
     environment:
       AZURE_AI_PROJECT_ENDPOINT: ${AZURE_AI_PROJECT_ENDPOINT:-}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
       AZURE_OPENAI_DEPLOYMENT: ${AZURE_OPENAI_DEPLOYMENT:-}
       AZURE_OPENAI_MINI_DEPLOYMENT: ${AZURE_OPENAI_MINI_DEPLOYMENT:-}
       APPLICATIONINSIGHTS_CONNECTION_STRING: ${APPLICATIONINSIGHTS_CONNECTION_STRING:-}
+      POSTGRES_CONNECTION_STRING: ${POSTGRES_CONNECTION_STRING:-}
+      BEARER_TOKEN: ${BEARER_TOKEN:-}
+      RFP_API_BASE_URL: ${RFP_API_BASE_URL:-}
+      # Sub-agent dispatch: set URLs for HTTP mode, leave empty for in-process
+      RFP_AGENT_URL: http://rfp-agent:8088
+      PROPERTY_PLANNING_AGENT_URL: http://property-planning-agent:8088
 
-  travel-advisor-agent:
-    image: hacktrial.azurecr.io/travel-advisor-agent:${TAG:-0.0.1}
+  rfp-agent:
+    image: hacktrial.azurecr.io/rfp-agent:${TAG:-0.0.1}
     build:
       context: .
-      dockerfile: advisor/agents/travel_advisor_agent/Dockerfile
+      dockerfile: advisor/agents/rfp/Dockerfile
     ports:
       - "8089:8088"
     environment:
       AZURE_AI_PROJECT_ENDPOINT: ${AZURE_AI_PROJECT_ENDPOINT:-}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
       AZURE_OPENAI_DEPLOYMENT: ${AZURE_OPENAI_DEPLOYMENT:-}
       AZURE_OPENAI_MINI_DEPLOYMENT: ${AZURE_OPENAI_MINI_DEPLOYMENT:-}
       APPLICATIONINSIGHTS_CONNECTION_STRING: ${APPLICATIONINSIGHTS_CONNECTION_STRING:-}
+      POSTGRES_CONNECTION_STRING: ${POSTGRES_CONNECTION_STRING:-}
+      BEARER_TOKEN: ${BEARER_TOKEN:-}
+      RFP_API_BASE_URL: ${RFP_API_BASE_URL:-}
 
-  meeting-broker-agent:
-    image: hacktrial.azurecr.io/meeting-broker-agent:${TAG:-0.0.1}
+  property-planning-agent:
+    image: hacktrial.azurecr.io/property-planning-agent:${TAG:-0.0.1}
     build:
       context: .
-      dockerfile: advisor/agents/meeting_broker_agent/Dockerfile
+      dockerfile: advisor/agents/property_planning/Dockerfile
     ports:
       - "8090:8088"
     environment:
       AZURE_AI_PROJECT_ENDPOINT: ${AZURE_AI_PROJECT_ENDPOINT:-}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
       AZURE_OPENAI_DEPLOYMENT: ${AZURE_OPENAI_DEPLOYMENT:-}
       AZURE_OPENAI_MINI_DEPLOYMENT: ${AZURE_OPENAI_MINI_DEPLOYMENT:-}
       APPLICATIONINSIGHTS_CONNECTION_STRING: ${APPLICATIONINSIGHTS_CONNECTION_STRING:-}
+      POSTGRES_CONNECTION_STRING: ${POSTGRES_CONNECTION_STRING:-}

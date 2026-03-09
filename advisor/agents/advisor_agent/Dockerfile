@@ -13,13 +13,15 @@ COPY pyproject.toml uv.lock .python-version ./
 # Copy shared library
 COPY advisor/shared/ advisor/shared/
 
-# Copy all agents (routing-agent depends on the other two at the workspace level)
+# Copy all agents (advisor-agent depends on the other two at the workspace level)
 COPY advisor/agents/advisor_agent/ advisor/agents/advisor_agent/
-COPY advisor/agents/travel_advisor_agent/ advisor/agents/travel_advisor_agent/
-COPY advisor/agents/meeting_broker_agent/ advisor/agents/meeting_broker_agent/
+
+# Copy tools (used as library dependencies by the routing agent)
+COPY advisor/tools/travel_advisor/ advisor/tools/travel_advisor/
+COPY advisor/tools/meeting_broker/ advisor/tools/meeting_broker/
 
 # Install dependencies for this specific agent
-RUN uv sync --package routing-agent --no-dev --frozen
+RUN uv sync --package advisor-agent --no-dev --frozen
 
 # --- Stage 2: Runtime ---
 FROM python:3.12-slim
@@ -32,8 +34,8 @@ COPY --from=builder /app/.venv /app/.venv
 # Copy application code
 COPY --from=builder /app/advisor/shared/src /app/advisor/shared/src
 COPY --from=builder /app/advisor/agents/advisor_agent/src /app/advisor/agents/advisor_agent/src
-COPY --from=builder /app/advisor/agents/travel_advisor_agent/src /app/advisor/agents/travel_advisor_agent/src
-COPY --from=builder /app/advisor/agents/meeting_broker_agent/src /app/advisor/agents/meeting_broker_agent/src
+COPY --from=builder /app/advisor/tools/travel_advisor/src /app/advisor/tools/travel_advisor/src
+COPY --from=builder /app/advisor/tools/meeting_broker/src /app/advisor/tools/meeting_broker/src
 
 # Add venv to PATH
 ENV PATH="/app/.venv/bin:$PATH"

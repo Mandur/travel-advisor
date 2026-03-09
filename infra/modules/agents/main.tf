@@ -33,8 +33,8 @@ variable "tags" {
 locals {
   agent_definitions = [
     {
-      name        = "routing-agent"
-      image       = "${var.acr_login_server}/routing-agent:latest"
+      name        = "advisor-agent"
+      image       = "${var.acr_login_server}/advisor-agent:latest"
       port        = 8088
       description = "Routes user intent to the correct downstream agent"
     },
