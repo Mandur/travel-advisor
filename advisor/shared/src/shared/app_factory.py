@@ -58,8 +58,14 @@ def create_app(
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         config = get_config()
-        setup_telemetry(config.application_insights_connection_string)
-        async with AsyncPostgresSaver.from_conn_string(config.postgres_connection_string) as checkpointer:
+        try:
+            setup_telemetry(config.application_insights_connection_string)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Failed to configure telemetry: %s", exc)
+        # AsyncPostgresSaver uses psycopg directly and does not accept SQLAlchemy-style
+        # driver suffixes (e.g. "postgresql+psycopg://"). Strip the suffix if present.
+        pg_conn = config.postgres_connection_string.replace("postgresql+psycopg://", "postgresql://", 1)
+        async with AsyncPostgresSaver.from_conn_string(pg_conn) as checkpointer:
             await checkpointer.setup()
             app.state.agent = create_agent_fn(checkpointer=checkpointer)
             logger.info("%s ready", title)

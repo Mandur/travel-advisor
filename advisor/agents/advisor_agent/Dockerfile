@@ -15,6 +15,8 @@ COPY advisor/shared/ advisor/shared/
 
 # Copy all agents (advisor-agent depends on the other two at the workspace level)
 COPY advisor/agents/advisor_agent/ advisor/agents/advisor_agent/
+COPY advisor/agents/rfp/ advisor/agents/rfp/
+COPY advisor/agents/property_planning/ advisor/agents/property_planning/
 
 # Copy tools (used as library dependencies by the routing agent)
 COPY advisor/tools/travel_advisor/ advisor/tools/travel_advisor/

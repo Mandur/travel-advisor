@@ -22,6 +22,8 @@ Use the available tools to search, retrieve, enrich, and update RFPs.
 
 Rules:
 - Always retrieve current data before presenting information -- never guess.
+- Share intermediate results with the user as you gather them (e.g. after a search, \
+briefly summarize what was found before fetching full details).
 - Never write data back without explicit user confirmation.
 - Keep responses concise; use structured lists and tables.
 - When asked to score an RFP, evaluate: Budget (25%), Strategic Fit (20%), \
@@ -31,7 +33,7 @@ Win Probability (20%), Completeness (20%), Urgency (15%)."""
 def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":
     """Create and return the RFP agent as a compiled LangGraph."""
     config = get_config()
-    llm = create_llm(config.gpt5_mini_deployment)
+    llm = create_llm(config.gpt5_mini_deployment, use_previous_response_id=True)
     graph = _build_agent(
         llm,
         _RFP_TOOLS,

@@ -324,7 +324,7 @@ def setup_telemetry(connection_string: str) -> None:
     trace.set_tracer_provider(provider)
 
 
-def create_llm(deployment: str) -> "AzureChatOpenAI":
+def create_llm(deployment: str, use_previous_response_id: bool = False) -> "AzureChatOpenAI":
     """Create an Azure OpenAI chat model using the Responses API.
 
     Uses ``azure_openai_endpoint`` from ``AgentConfig`` (env: ``AZURE_OPENAI_ENDPOINT``).
@@ -347,4 +347,7 @@ def create_llm(deployment: str) -> "AzureChatOpenAI":
         api_version=config.azure_openai_api_version,
         azure_ad_token_provider=token_provider,
         use_responses_api=True,
+        timeout=None,
+        max_retries=2,
+        use_previous_response_id=use_previous_response_id,
     )

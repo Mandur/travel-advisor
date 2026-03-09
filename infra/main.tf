@@ -1,4 +1,12 @@
 terraform {
+  # backend "azurerm" {
+  #   resource_group_name  = "rg-hosbi-advisor-teams-poc"
+  #   storage_account_name = "tfstateadvisorhack"
+  #   container_name       = "tfstate"
+  #   key                  = "advisor-hack.tfstate"
+  #   use_azuread_auth     = true
+  # }
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -61,7 +69,6 @@ module "monitoring" {
 
 module "postgres" {
   source = "./modules/postgres"
-
   base_name           = var.base_name
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
