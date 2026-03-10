@@ -33,11 +33,11 @@ $ErrorActionPreference = "Stop"
 
 function Write-Banner {
     $width = 62
-    $border = "─" * $width
+    $border = "-" * $width
     Write-Host ""
-    Write-Host "  ┌$border┐" -ForegroundColor Cyan
-    Write-Host "  │$((" " * [int](($width - 20) / 2)))Advisor Agent Chat$((" " * [int][Math]::Ceiling(($width - 20) / 2)))│" -ForegroundColor Cyan
-    Write-Host "  └$border┘" -ForegroundColor Cyan
+    Write-Host "  +$border+" -ForegroundColor Cyan
+    Write-Host "  |$((" " * [int](($width - 20) / 2)))Advisor Agent Chat$((" " * [int][Math]::Ceiling(($width - 20) / 2)))|" -ForegroundColor Cyan
+    Write-Host "  +$border+" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  Endpoint : $Url" -ForegroundColor DarkGray
     Write-Host "  Commands : /new  start a new session" -ForegroundColor DarkGray
@@ -73,7 +73,7 @@ function Assert-AgentReachable([string]$BaseUrl) {
     }
     catch {
         Write-Host ""
-        Write-Host "  ✘  Cannot reach advisor agent at $BaseUrl" -ForegroundColor Red
+        Write-Host "  X  Cannot reach advisor agent at $BaseUrl" -ForegroundColor Red
         Write-Host "     Make sure docker-compose is running:  docker-compose up" -ForegroundColor DarkRed
         Write-Host "     Or pass a different URL:  .\scripts\chat.ps1 -Url <url>" -ForegroundColor DarkRed
         Write-Host ""
@@ -97,7 +97,7 @@ while ($true) {
     Write-Host "You  > " -ForegroundColor Green -NoNewline
     $userInput = Read-Host
 
-    # Blank line — skip
+    # Blank line - skip
     if ([string]::IsNullOrWhiteSpace($userInput)) { continue }
 
     # Built-in commands
@@ -106,7 +106,7 @@ while ($true) {
         "quit"  { Write-Host "`n  Goodbye!`n" -ForegroundColor Cyan; exit 0 }
         "/new"  {
             $currentSessionId = New-SessionId
-            Write-Host "  ↺  New session started: $currentSessionId`n" -ForegroundColor Yellow
+            Write-Host "  *  New session started: $currentSessionId`n" -ForegroundColor Yellow
             continue
         }
         "/id"   {
@@ -135,7 +135,7 @@ while ($true) {
         # Word-wrap the reply to 80 chars, indented to align with "Agent> "
         $reply    = $result.reply
         $maxWidth = 80
-        $indent   = "       "   # 7 spaces — same width as "Agent> "
+        $indent   = "       "   # 7 spaces - same width as "Agent> "
 
         $words  = $reply -split ' '
         $line   = ""
@@ -169,7 +169,7 @@ while ($true) {
     }
     catch {
         Write-Host "" 
-        Write-Host "  ✘  Request failed: $_" -ForegroundColor Red
+        Write-Host "  X  Request failed: $_" -ForegroundColor Red
         Write-Host ""
     }
 }
