@@ -329,7 +329,12 @@ def create_llm(deployment: str, use_previous_response_id: bool = False) -> "Azur
 
     Uses ``azure_openai_endpoint`` from ``AgentConfig`` (env: ``AZURE_OPENAI_ENDPOINT``).
     Authentication is handled by ``DefaultAzureCredential`` via a bearer-token provider.
+
+    SSL behaviour is controlled by ``SSL_CA_BUNDLE`` (path to a custom CA bundle)
+    and ``SSL_VERIFY`` (set to ``false`` to disable verification entirely — only
+    for development behind a corporate proxy).
     """
+    import httpx
     from azure.identity import DefaultAzureCredential
     from azure.identity import get_bearer_token_provider
     from langchain_openai import AzureChatOpenAI
@@ -337,17 +342,25 @@ def create_llm(deployment: str, use_previous_response_id: bool = False) -> "Azur
     from shared.config import get_config
 
     config = get_config()
-    token_provider = get_bearer_token_provider(
-        DefaultAzureCredential(),
-        "https://cognitiveservices.azure.com/.default",
-    )
-    return AzureChatOpenAI(
+    # Resolve SSL verify setting: CA bundle path > bool flag > system default.
+    ssl_verify: bool | str = config.ssl_ca_bundle if config.ssl_ca_bundle else config.ssl_verify
+    http_async_client = httpx.AsyncClient(verify=ssl_verify)
+    common_kwargs: dict = dict(
         azure_endpoint=config.azure_openai_endpoint,
         azure_deployment=deployment,
         api_version=config.azure_openai_api_version,
-        azure_ad_token_provider=token_provider,
         use_responses_api=True,
         timeout=None,
         max_retries=2,
         use_previous_response_id=use_previous_response_id,
+        http_async_client=http_async_client,
     )
+    if config.azure_openai_api_key:
+        # API key auth — no RBAC role required.
+        return AzureChatOpenAI(api_key=config.azure_openai_api_key, **common_kwargs)
+    # Fallback: Azure AD managed-identity / DefaultAzureCredential.
+    token_provider = get_bearer_token_provider(
+        DefaultAzureCredential(),
+        "https://cognitiveservices.azure.com/.default",
+    )
+    return AzureChatOpenAI(azure_ad_token_provider=token_provider, **common_kwargs)

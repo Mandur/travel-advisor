@@ -16,6 +16,7 @@ class AgentConfig(BaseSettings):
 
     azure_ai_project_endpoint: str = ""
     azure_openai_endpoint: Annotated[str, Field(validation_alias="AZURE_OPENAI_ENDPOINT")] = ""
+    azure_openai_api_key: Annotated[str, Field(validation_alias="AZURE_OPENAI_API_KEY")] = ""
     gpt5_2_chat_deployment: Annotated[str, Field(validation_alias="AZURE_OPENAI_DEPLOYMENT")] = "gpt-5.2-chat"
     gpt5_mini_deployment: Annotated[str, Field(validation_alias="AZURE_OPENAI_MINI_DEPLOYMENT")] = "gpt-5-mini"
     application_insights_connection_string: Annotated[str, Field(validation_alias="APPLICATIONINSIGHTS_CONNECTION_STRING")] = ""
@@ -30,11 +31,16 @@ class AgentConfig(BaseSettings):
     rfp_api_base_url: Annotated[str, Field(validation_alias="RFP_API_BASE_URL")] = "https://mockzilla-api-erfpmad.delightfulmoss-ca1544a1.eastus.azurecontainerapps.io/mock/rfp"
     rfp_api_timeout: Annotated[float, Field(validation_alias="RFP_API_TIMEOUT")] = 60.0
     # LangGraph / Azure OpenAI inference
-    azure_openai_api_version: str = "2025-03-01-preview"
+    azure_openai_api_version: Annotated[str, Field(validation_alias="AZURE_OPENAI_API_VERSION")] = "2025-04-01-preview"
     redis_url: Annotated[str, Field(validation_alias="REDIS_URL")] = ""
     # Sub-agent dispatch: empty = in-process (import), URL = HTTP call to /chat
     rfp_agent_url: Annotated[str, Field(validation_alias="RFP_AGENT_URL")] = ""
     property_planning_agent_url: Annotated[str, Field(validation_alias="PROPERTY_PLANNING_AGENT_URL")] = ""
+    # SSL / TLS
+    # Set SSL_VERIFY=false to disable certificate verification (e.g. corporate proxies).
+    # Set SSL_CA_BUNDLE=/path/to/ca-bundle.crt to trust a custom CA (preferred over disabling).
+    ssl_verify: Annotated[bool, Field(validation_alias="SSL_VERIFY")] = True
+    ssl_ca_bundle: Annotated[str, Field(validation_alias="SSL_CA_BUNDLE")] = ""
 
 
 @lru_cache(maxsize=1)

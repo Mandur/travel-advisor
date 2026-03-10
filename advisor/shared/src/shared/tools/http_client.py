@@ -6,6 +6,8 @@ from typing import Any
 
 import httpx
 
+from shared.config import get_config
+
 
 class ApiClient:
     """Async wrapper around httpx with persistent connection pooling.
@@ -29,10 +31,13 @@ class ApiClient:
         }
         if bearer_token:
             headers["Authorization"] = f"Bearer {bearer_token}"
+        config = get_config()
+        ssl_verify: bool | str = config.ssl_ca_bundle if config.ssl_ca_bundle else config.ssl_verify
         self._client = httpx.AsyncClient(
             base_url=self.base_url,
             headers=headers,
             timeout=timeout,
+            verify=ssl_verify,
         )
 
     # -- helpers ---------------------------------------------------------------
