@@ -10,7 +10,7 @@ import openai
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, Request
 from langchain_core.messages import HumanMessage
-from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from langgraph.checkpoint.redis.aio import AsyncRedisSaver
 from langgraph.graph.state import CompiledStateGraph
 from pydantic import BaseModel
 
@@ -62,11 +62,16 @@ def create_app(
             setup_telemetry(config.application_insights_connection_string)
         except Exception as exc:  # noqa: BLE001
             logger.warning("Failed to configure telemetry: %s", exc)
-        # AsyncPostgresSaver uses psycopg directly and does not accept SQLAlchemy-style
-        # driver suffixes (e.g. "postgresql+psycopg://"). Strip the suffix if present.
-        pg_conn = config.postgres_connection_string.replace("postgresql+psycopg://", "postgresql://", 1)
-        async with AsyncPostgresSaver.from_conn_string(pg_conn) as checkpointer:
-            await checkpointer.setup()
+        redis_url = config.redis_url.strip()
+        if not redis_url:
+            logger.info("No REDIS_URL configured; starting without persistent LangGraph checkpointing")
+            app.state.agent = create_agent_fn(checkpointer=None)
+            logger.info("%s ready", title)
+            yield
+            return
+
+        async with AsyncRedisSaver.from_conn_string(redis_url) as checkpointer:
+            await checkpointer.asetup()
             app.state.agent = create_agent_fn(checkpointer=checkpointer)
             logger.info("%s ready", title)
             yield

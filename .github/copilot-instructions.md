@@ -66,4 +66,4 @@ User -> Advisor Agent (gpt-5.2-chat, supervisor)
 - **Telemetry:** OpenTelemetry -> Azure Application Insights via `shared.utils.setup_telemetry()`.
 - **Logging:** Use `shared.utils.setup_logging(agent_name)` -- produces structured `timestamp | agent | level | message` format.
 - **Docker:** All Dockerfiles use multi-stage builds (uv builder -> slim runtime). Build context is always the repo root, not the agent directory. Only agents (not tools) have Dockerfiles.
-- **Infrastructure:** Terraform modules in `infra/` provision ACR, AI Foundry, Container Apps, Key Vault, Bot Service, PostgreSQL, and monitoring. Deploy with `terraform apply`.
+- **Infrastructure:** Terraform modules in `infra/` provision ACR, AI Foundry, Container Apps, Key Vault, Bot Service, Azure Managed Redis, and monitoring. Deploy with `terraform apply`.

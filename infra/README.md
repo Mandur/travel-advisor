@@ -28,13 +28,15 @@ State is stored in the `tfstate` blob container of the `tfstateadvisorhack` stor
 | `acr` | Azure Container Registry |
 | `foundry` | Azure AI Foundry (AI Services + project) |
 | `monitoring` | Log Analytics + Application Insights |
-| `postgres` | Azure Database for PostgreSQL Flexible Server |
+| `redis` | Azure Managed Redis for LangGraph checkpoint storage |
 | `keyvault` | Azure Key Vault |
 | `appservice` | Container Apps environment + agent apps |
 | `agents` | AI Foundry agent metadata |
 | `bot` | Azure Bot Service + Teams channel |
 
 A single user-assigned managed identity (`{base_name}-identity`) is shared across all agents. It is granted **AcrPull**, **Cognitive Services OpenAI User**, **Azure AI User**, and **Key Vault Secrets User** roles automatically.
+
+The Redis module provisions Azure Managed Redis via `azapi` and enables the `RedisJSON` and `RediSearch` modules required by the LangGraph Redis checkpointer.
 
 ## Usage
 

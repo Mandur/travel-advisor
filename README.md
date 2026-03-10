@@ -25,7 +25,7 @@ advisor/
     meeting_broker/  # RFP API tool functions (library, imported by rfp)
     travel_advisor/  # Hotel pricing tools (library)
   shared/            # Config, models, app factory, utilities
-infra/               # Terraform for Azure (ACR, Container Apps, PostgreSQL, etc.)
+infra/               # Terraform for Azure (ACR, Container Apps, Azure Managed Redis, etc.)
 scripts/             # Build & deploy helpers
 ```
 
@@ -48,7 +48,7 @@ uv sync --all-packages
 
 ```bash
 cp .env.example .env
-# Fill in Azure OpenAI endpoint, deployment names, and credentials
+# Fill in Azure OpenAI endpoint, deployment names, credentials, and optionally REDIS_URL
 ```
 
 ### 3. Run locally
@@ -79,9 +79,12 @@ docker compose up --build
 | `AZURE_OPENAI_ENDPOINT` | Azure OpenAI resource URL |
 | `AZURE_OPENAI_DEPLOYMENT` | Large model name (supervisor) |
 | `AZURE_OPENAI_MINI_DEPLOYMENT` | Small model name (sub-agents) |
-| `POSTGRES_CONNECTION_STRING` | LangGraph checkpoint store |
+| `REDIS_URL` | LangGraph checkpoint store (`rediss://...` for Azure Managed Redis) |
 | `RFP_AGENT_URL` | If set, advisor calls RFP agent over HTTP instead of in-process |
 | `PROPERTY_PLANNING_AGENT_URL` | Same, for property planning agent |
+
+If `REDIS_URL` is left empty, the agents still start locally but LangGraph checkpoint persistence is disabled.
+For local persistence, point `REDIS_URL` to Redis Stack or Azure Managed Redis with `RedisJSON` and `RediSearch` enabled.
 
 ## Useful Commands
 
