@@ -5,8 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from langchain.agents import create_agent as _build_agent
-from langchain_core.tools import tool
 
+from hotelligence_advisor.tools import HOTELLIGENCE_TOOLS
 from shared.config import get_config
 from shared.utils import create_llm, setup_logging
 
@@ -18,22 +18,15 @@ logger = setup_logging("property-planning-agent")
 
 PROPERTY_PLANNING_INSTRUCTIONS = """\
 You are a property planning agent for a hospitality platform.
-You help users with venue selection, space planning, and property management tasks.
+You help users with venue selection, space planning, and hotel performance analytics.
 
-Use the available tools to handle property planning requests."""
+You have access to the Hotelligence360 advisor — use it to answer questions about
+occupancy, revenue, segmentation, forecasts, and pace reports for a specific property.
 
-
-@tool
-def placeholder_tool(query: str) -> str:
-    """Placeholder tool -- replace with actual property planning tools.
-
-    Args:
-        query: The user query to process.
-
-    Returns:
-        A placeholder response.
-    """
-    return f"Property planning agent received: {query}"
+Rules:
+- Always ask for (or infer) the property ID before calling Hotelligence tools.
+- Present numbers and trends clearly; avoid raw JSON in your responses.
+- If the advisor returns bubble_prompts, offer them as suggested follow-up questions."""
 
 
 def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":
@@ -42,7 +35,7 @@ def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "Compiled
     llm = create_llm(config.gpt5_mini_deployment)
     graph = _build_agent(
         llm,
-        [placeholder_tool],
+        HOTELLIGENCE_TOOLS,
         system_prompt=PROPERTY_PLANNING_INSTRUCTIONS,
         checkpointer=checkpointer,
     )

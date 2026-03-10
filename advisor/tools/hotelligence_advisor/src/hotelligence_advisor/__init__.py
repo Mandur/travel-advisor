@@ -1,0 +1,1 @@
+"""Hotelligence advisor tool package."""
