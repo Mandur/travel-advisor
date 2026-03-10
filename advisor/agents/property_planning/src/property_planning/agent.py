@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from importlib.metadata import PackageNotFoundError, version
 from typing import TYPE_CHECKING
 
 from langchain.agents import create_agent as _build_agent
@@ -16,7 +17,13 @@ if TYPE_CHECKING:
     from langgraph.checkpoint.base import BaseCheckpointSaver
 
 logger = setup_logging("property-planning-agent")
-AGENT_VERSION = "0.1.0"
+
+
+def _agent_version() -> str:
+  try:
+    return version("property-planning-agent")
+  except PackageNotFoundError:
+    return "unknown"
 
 PROPERTY_PLANNING_INSTRUCTIONS = """\
 You are a hotel analytics agent for a hospitality platform.
@@ -49,7 +56,7 @@ Do NOT reply with text first — call the tool immediately.
 @tool
 def agent_version() -> str:
     """Return this agent's version."""
-    return f"Property Planning Agent version {AGENT_VERSION}"
+  return f"Property Planning Agent version {_agent_version()}"
 
 
 def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":

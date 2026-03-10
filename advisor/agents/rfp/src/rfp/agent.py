@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from importlib.metadata import PackageNotFoundError, version
 from typing import TYPE_CHECKING
 
 from langchain.agents import create_agent as _build_agent
@@ -16,7 +17,13 @@ if TYPE_CHECKING:
     from langgraph.checkpoint.base import BaseCheckpointSaver
 
 logger = setup_logging("rfp-agent")
-AGENT_VERSION = "0.1.0"
+
+
+def _agent_version() -> str:
+    try:
+        return version("rfp-agent")
+    except PackageNotFoundError:
+        return "unknown"
 
 RFP_AGENT_INSTRUCTIONS = """\
 You are an RFP Sales Assistant for a hospitality platform.
@@ -36,7 +43,7 @@ Win Probability (20%), Completeness (20%), Urgency (15%)."""
 @tool
 def agent_version() -> str:
     """Return this agent's version."""
-    return f"RFP Agent version {AGENT_VERSION}"
+    return f"RFP Agent version {_agent_version()}"
 
 
 def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":

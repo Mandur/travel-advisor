@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from importlib.metadata import PackageNotFoundError, version
 from typing import TYPE_CHECKING
 
 from langchain.agents import create_agent as _build_agent
@@ -17,7 +18,13 @@ if TYPE_CHECKING:
     from langgraph.checkpoint.base import BaseCheckpointSaver
 
 logger = setup_logging("advisor-agent")
-AGENT_VERSION = "0.1.0"
+
+
+def _agent_version() -> str:
+    try:
+        return version("advisor-agent")
+    except PackageNotFoundError:
+        return "unknown"
 
 SUPERVISOR_INSTRUCTIONS = """\
 You are a helpful assistant for a hospitality platform.
@@ -103,7 +110,7 @@ def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "Compiled
     @tool
     def agent_version() -> str:
         """Return this agent's version."""
-        return f"Advisor Agent version {AGENT_VERSION}"
+        return f"Advisor Agent version {_agent_version()}"
 
     supervisor_llm = create_llm(config.gpt5_2_chat_deployment)
     graph = _build_agent(
