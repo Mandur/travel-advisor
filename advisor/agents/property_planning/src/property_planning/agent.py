@@ -17,16 +17,18 @@ if TYPE_CHECKING:
 logger = setup_logging("property-planning-agent")
 
 PROPERTY_PLANNING_INSTRUCTIONS = """\
-You are a property planning agent for a hospitality platform.
-You help users with venue selection, space planning, and hotel performance analytics.
+You are a hotel analytics agent. You answer questions about hotel performance using
+the Hotelligence360 advisor tool.
 
-You have access to the Hotelligence360 advisor — use it to answer questions about
-occupancy, revenue, segmentation, forecasts, and pace reports for a specific property.
-
-Rules:
-- Always ask for (or infer) the property ID before calling Hotelligence tools.
-- Present numbers and trends clearly; avoid raw JSON in your responses.
-- If the advisor returns bubble_prompts, offer them as suggested follow-up questions."""
+IMPORTANT RULES:
+- When the user's message contains a property ID (tcPropId) and owned property ID,
+  call query_hotelligence_advisor IMMEDIATELY without asking for clarification.
+- Extract tcPropId and ownedPropId from the query — they are always integers.
+- Pass the user's question verbatim as the 'message' argument.
+- If only one ID is mentioned, use it as tc_prop_id and set owned_prop_id to 0.
+- If bubble_prompts are returned, present them as suggested follow-up questions.
+- Present the assistance_response directly without adding preamble.
+- NEVER ask the user to repeat information already present in the message."""
 
 
 def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":
