@@ -55,7 +55,7 @@ Do NOT reply with text first — call the tool immediately.
 
 @tool
 def agent_version() -> str:
-    """Return this agent's version."""
+  """Return this agent's version."""
   return f"Property Planning Agent version {_agent_version()}"
 
 
