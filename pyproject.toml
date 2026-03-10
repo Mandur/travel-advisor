@@ -3,6 +3,9 @@ name = "hack-trial"
 version = "0.1.0"
 description = "Multi-agent monorepo for Microsoft Foundry"
 requires-python = ">=3.12"
+dependencies = [
+    "pip-system-certs>=5.3",
+]
 
 [tool.uv]
 prerelease = "allow"
