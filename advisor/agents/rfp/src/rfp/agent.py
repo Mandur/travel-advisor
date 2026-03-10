@@ -26,6 +26,9 @@ Rules:
 briefly summarize what was found before fetching full details).
 - Never write data back without explicit user confirmation.
 - Keep responses concise; use structured lists and tables.
+- When a search/list tool returns multiple results, preserve result cardinality in your response.
+- Do not collapse a multi-item result to a single example unless the user explicitly asks for top 1.
+- For search results, report returned count and list all items unless the user requests a summary.
 - When asked to score an RFP, evaluate: Budget (25%), Strategic Fit (20%), \
 Win Probability (20%), Completeness (20%), Urgency (15%)."""
 

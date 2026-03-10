@@ -29,6 +29,8 @@ from meeting_broker.rfp_models import (
 
 logger = setup_logging("meeting-broker")
 
+_DEFAULT_PAGE_LIMIT = 100
+
 
 @lru_cache(maxsize=1)
 def _client() -> ApiClient:
@@ -41,6 +43,56 @@ def _client() -> ApiClient:
 
 
 # -- Search & retrieve --------------------------------------------------------
+
+
+async def _search_rfps_impl(
+    meeting_name: str | None = None,
+    account_name: str | None = None,
+    status: str | None = None,
+    arrival_date: str | None = None,
+    received_date: str | None = None,
+    total_budget: str | None = None,
+    rate: str | None = None,
+    proposal_sent_date: str | None = None,
+    external_rfp_id: str | None = None,
+    internal_id: str | None = None,
+    location_name: str | None = None,
+    limit: int | None = None,
+    sort_by: str | None = None,
+    rfp_milestone: str | None = None,
+    next_step_name: str | None = None,
+    next_step_due_date: str | None = None,
+    continuation_token: str | None = None,
+    is_next_step_overdue: bool | None = None,
+    is_export: bool | None = None,
+) -> dict[str, Any]:
+    effective_limit = _DEFAULT_PAGE_LIMIT if limit is None else limit
+
+    raw = await _client().get(
+        "/rfps",
+        params={
+            "meetingName": meeting_name,
+            "accountName": account_name,
+            "status": status,
+            "arrivalDate": arrival_date,
+            "receivedDate": received_date,
+            "totalBudget": total_budget,
+            "rate": rate,
+            "proposalSentDate": proposal_sent_date,
+            "externalRfpId": external_rfp_id,
+            "internalId": internal_id,
+            "locationName": location_name,
+            "limit": effective_limit,
+            "sortBy": sort_by,
+            "rfpMilestone": rfp_milestone,
+            "nextStepName": next_step_name,
+            "nextStepDueDate": next_step_due_date,
+            "continuationToken": continuation_token,
+            "isNextStepOverdue": is_next_step_overdue,
+            "isExport": is_export,
+        },
+    )
+    return SearchRfpResponse.model_validate(raw).model_dump()
 
 
 @tool
@@ -81,7 +133,7 @@ async def search_rfps(
         external_rfp_id: External RFP identifier.
         internal_id: Internal RFP identifier.
         location_name: Name of the receiving location.
-        limit: Maximum number of results to return.
+        limit: Maximum number of results to return (defaults to 100).
         sort_by: Column to sort results by.
         rfp_milestone: Milestone type name (e.g. "Published", "Viewed").
         next_step_name: Partial name of the next step action.
@@ -93,31 +145,76 @@ async def search_rfps(
     Returns:
         Dict with a list of RFP summaries and total count.
     """
-    raw = await _client().get(
-        "/rfps",
-        params={
-            "meetingName": meeting_name,
-            "accountName": account_name,
-            "status": status,
-            "arrivalDate": arrival_date,
-            "receivedDate": received_date,
-            "totalBudget": total_budget,
-            "rate": rate,
-            "proposalSentDate": proposal_sent_date,
-            "externalRfpId": external_rfp_id,
-            "internalId": internal_id,
-            "locationName": location_name,
-            "limit": limit,
-            "sortBy": sort_by,
-            "rfpMilestone": rfp_milestone,
-            "nextStepName": next_step_name,
-            "nextStepDueDate": next_step_due_date,
-            "continuationToken": continuation_token,
-            "isNextStepOverdue": is_next_step_overdue,
-            "isExport": is_export,
-        },
+    return await _search_rfps_impl(
+        meeting_name=meeting_name,
+        account_name=account_name,
+        status=status,
+        arrival_date=arrival_date,
+        received_date=received_date,
+        total_budget=total_budget,
+        rate=rate,
+        proposal_sent_date=proposal_sent_date,
+        external_rfp_id=external_rfp_id,
+        internal_id=internal_id,
+        location_name=location_name,
+        limit=limit,
+        sort_by=sort_by,
+        rfp_milestone=rfp_milestone,
+        next_step_name=next_step_name,
+        next_step_due_date=next_step_due_date,
+        continuation_token=continuation_token,
+        is_next_step_overdue=is_next_step_overdue,
+        is_export=is_export,
     )
-    return SearchRfpResponse.model_validate(raw).model_dump()
+
+
+@tool
+async def list_rfps(
+    meeting_name: str | None = None,
+    account_name: str | None = None,
+    status: str | None = None,
+    arrival_date: str | None = None,
+    received_date: str | None = None,
+    total_budget: str | None = None,
+    rate: str | None = None,
+    proposal_sent_date: str | None = None,
+    external_rfp_id: str | None = None,
+    internal_id: str | None = None,
+    location_name: str | None = None,
+    limit: int | None = None,
+    sort_by: str | None = None,
+    rfp_milestone: str | None = None,
+    next_step_name: str | None = None,
+    next_step_due_date: str | None = None,
+    continuation_token: str | None = None,
+    is_next_step_overdue: bool | None = None,
+    is_export: bool | None = None,
+) -> dict[str, Any]:
+    """List RFPs matching the supplied filters.
+
+    Alias of search_rfps with identical parameters and behavior.
+    """
+    return await _search_rfps_impl(
+        meeting_name=meeting_name,
+        account_name=account_name,
+        status=status,
+        arrival_date=arrival_date,
+        received_date=received_date,
+        total_budget=total_budget,
+        rate=rate,
+        proposal_sent_date=proposal_sent_date,
+        external_rfp_id=external_rfp_id,
+        internal_id=internal_id,
+        location_name=location_name,
+        limit=limit,
+        sort_by=sort_by,
+        rfp_milestone=rfp_milestone,
+        next_step_name=next_step_name,
+        next_step_due_date=next_step_due_date,
+        continuation_token=continuation_token,
+        is_next_step_overdue=is_next_step_overdue,
+        is_export=is_export,
+    )
 
 
 @tool
@@ -236,15 +333,17 @@ async def get_rfp_team(
 
     Args:
         rfp_id: UUID of the RFP.
-        limit: Maximum number of team members to return (default 100).
+        limit: Maximum number of team members to return (defaults to 100).
         continuation_token: Token for the next page of results.
 
     Returns:
         Dict with team members and total count.
     """
+    effective_limit = _DEFAULT_PAGE_LIMIT if limit is None else limit
+
     raw = await _client().get(
         f"/rfps/{rfp_id}/team",
-        params={"limit": limit, "continuationToken": continuation_token},
+        params={"limit": effective_limit, "continuationToken": continuation_token},
     )
     return TeamResponse.model_validate(raw).model_dump()
 
@@ -446,6 +545,7 @@ async def remove_rfp_team_member(rfp_id: str, user_id: str) -> dict[str, Any]:
 
 _RFP_TOOLS = [
     search_rfps,
+    list_rfps,
     get_rfp,
     get_rfp_additional_information,
     update_rfp,
