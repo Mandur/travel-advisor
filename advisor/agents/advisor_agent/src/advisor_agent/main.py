@@ -3,7 +3,12 @@
 from shared.app_factory import create_app, run_app
 from advisor_agent.agent import create_agent
 
-app = create_app("Advisor Agent", create_agent, include_teams=True)
+app = create_app(
+    agent_id="advisor_agent",
+    title="Advisor Agent",
+    create_agent_fn=create_agent,
+    include_teams=True,
+)
 
 if __name__ == "__main__":
     run_app("advisor_agent.main:app")

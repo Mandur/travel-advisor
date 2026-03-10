@@ -8,6 +8,8 @@ from typing import Annotated, Any, Callable
 
 import openai
 import uvicorn
+from copilotkit import LangGraphAGUIAgent
+from .langchain_endpoint import add_langgraph_fastapi_endpoint_patched
 from fastapi import Depends, FastAPI, HTTPException, Request
 from langchain_core.messages import HumanMessage
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
@@ -45,6 +47,7 @@ def _extract_reply(raw: Any) -> str:
 
 
 def create_app(
+    agent_id: str,
     title: str,
     create_agent_fn: Callable[..., CompiledStateGraph],
     *,
@@ -64,7 +67,9 @@ def create_app(
             logger.warning("Failed to configure telemetry: %s", exc)
         # AsyncPostgresSaver uses psycopg directly and does not accept SQLAlchemy-style
         # driver suffixes (e.g. "postgresql+psycopg://"). Strip the suffix if present.
-        pg_conn = config.postgres_connection_string.replace("postgresql+psycopg://", "postgresql://", 1)
+        pg_conn = config.postgres_connection_string.replace(
+            "postgresql+psycopg://", "postgresql://", 1
+        )
         async with AsyncPostgresSaver.from_conn_string(pg_conn) as checkpointer:
             await checkpointer.setup()
             app.state.agent = create_agent_fn(checkpointer=checkpointer)
@@ -72,6 +77,16 @@ def create_app(
             yield
 
     app = FastAPI(title=title, lifespan=lifespan)
+
+    add_langgraph_fastapi_endpoint_patched(
+        app=app,
+        agent_ctor=lambda: LangGraphAGUIAgent(
+            name=agent_id,
+            description=title,
+            graph=app.state.agent,
+        ),
+        path=f"/agent/{agent_id}",
+    )
 
     if include_teams:
         from shared.teams_adapter import create_teams_router
@@ -86,22 +101,32 @@ def create_app(
         return {"status": "ok"}
 
     @app.post("/chat", response_model=ChatResponse)
-    async def chat(req: ChatRequest, agent: Annotated[CompiledStateGraph, Depends(get_agent)]) -> ChatResponse:
+    async def chat(
+        req: ChatRequest, agent: Annotated[CompiledStateGraph, Depends(get_agent)]
+    ) -> ChatResponse:
         session_id = req.session_id or str(uuid.uuid4())
         try:
             result = await agent.ainvoke(
                 {"messages": [HumanMessage(content=req.message)]},
                 config={
                     "configurable": {"thread_id": session_id},
-                    "callbacks": [ToolLoggingCallbackHandler(logger), LLMLoggingCallbackHandler()],
+                    "callbacks": [
+                        ToolLoggingCallbackHandler(logger),
+                        LLMLoggingCallbackHandler(),
+                    ],
                 },
             )
         except openai.RateLimitError as exc:
             logger.warning("Rate limit hit: %s", exc)
-            raise HTTPException(status_code=429, detail="The AI service is currently rate-limited. Please retry in a moment.") from exc
+            raise HTTPException(
+                status_code=429,
+                detail="The AI service is currently rate-limited. Please retry in a moment.",
+            ) from exc
         except openai.APIStatusError as exc:
             logger.error("OpenAI API error %s: %s", exc.status_code, exc)
-            raise HTTPException(status_code=502, detail=f"Upstream AI service error: {exc.message}") from exc
+            raise HTTPException(
+                status_code=502, detail=f"Upstream AI service error: {exc.message}"
+            ) from exc
         reply = _extract_reply(result["messages"][-1].content)
         return ChatResponse(reply=reply, session_id=session_id)
 
