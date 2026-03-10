@@ -9,11 +9,40 @@ import httpx
 
 from shared.config import get_config
 
+# First-turn query: property context required
 _CHATBOT_QUERY = """
 query chatbot($property: PropertyInput!, $message: String!) {
   chatbot(property: $property, message: $message) {
-    assistance_response
+    assistant_response {
+      answer
+      data_table
+      currency_symbol
+    }
+    thread
+    error
     bubble_prompts
+    deployment_id
+    applied_filters
+    extracted_metrics
+  }
+}
+"""
+
+# Follow-up query: continues an existing thread, no property needed
+_CHATBOT_THREAD_QUERY = """
+query chatbot($thread_id: String!, $message: String!) {
+  chatbot(thread_id: $thread_id, message: $message) {
+    assistant_response {
+      answer
+      data_table
+      currency_symbol
+    }
+    thread
+    error
+    bubble_prompts
+    deployment_id
+    applied_filters
+    extracted_metrics
   }
 }
 """
@@ -28,7 +57,7 @@ class HotelligenceClient:
         timeout: Request timeout in seconds.
     """
 
-    def __init__(self, url: str, bearer_token: str, timeout: float = 60.0) -> None:
+    def __init__(self, url: str, bearer_token: str, timeout: float = 120.0) -> None:
         self._url = url
         config = get_config()
         ssl_verify: bool | str = config.ssl_ca_bundle if config.ssl_ca_bundle else config.ssl_verify
@@ -44,40 +73,59 @@ class HotelligenceClient:
 
     async def query_chatbot(
         self,
-        tc_prop_id: int,
-        owned_prop_id: int,
         message: str,
+        tc_prop_id: int | None = None,
+        owned_prop_id: int = 0,
+        thread_id: str | None = None,
     ) -> dict[str, Any]:
         """Send a chatbot query to the Hotelligence360 GraphQL endpoint.
 
+        Supports two modes:
+        - **New conversation**: provide ``tc_prop_id`` (and optionally ``owned_prop_id``).
+        - **Follow-up**: provide ``thread_id`` from a previous response; no property needed.
+
         Args:
-            tc_prop_id: The TravelClick property ID (integer).
-            owned_prop_id: The owned property ID (integer).
             message: Natural language question to ask the advisor.
+            tc_prop_id: TravelClick property ID. Required when starting a new conversation.
+            owned_prop_id: Owned property ID (default 0). Used in new conversations.
+            thread_id: Thread ID from a previous response. Enables follow-up questions.
 
         Returns:
-            Dict with ``assistance_response`` (str) and ``bubble_prompts`` (list).
+            Dict with all chatbot response fields including ``thread`` for continuity.
 
         Raises:
+            ValueError: If neither ``tc_prop_id`` nor ``thread_id`` is provided.
             httpx.HTTPStatusError: On non-2xx responses.
             RuntimeError: If the GraphQL response contains errors.
         """
-        payload = {
-            "query": _CHATBOT_QUERY,
-            "variables": {
-                "property": {
-                    "tcPropId": tc_prop_id,
-                    "ownedPropId": owned_prop_id,
+        if thread_id:
+            payload = {
+                "query": _CHATBOT_THREAD_QUERY,
+                "variables": {"thread_id": thread_id, "message": message},
+            }
+        elif tc_prop_id is not None:
+            payload = {
+                "query": _CHATBOT_QUERY,
+                "variables": {
+                    "property": {
+                        "tcPropId": tc_prop_id,
+                        "ownedPropId": owned_prop_id,
+                    },
+                    "message": message,
                 },
-                "message": message,
-            },
-        }
+            }
+        else:
+            raise ValueError("Either tc_prop_id or thread_id must be provided.")
+
         resp = await self._client.post(self._url, json=payload)
         resp.raise_for_status()
         body: dict[str, Any] = resp.json()
         if "errors" in body:
             raise RuntimeError(f"GraphQL errors: {body['errors']}")
-        return body["data"]["chatbot"]
+        chatbot = body["data"]["chatbot"]
+        if chatbot.get("error"):
+            raise RuntimeError(f"Hotelligence error: {chatbot['error']}")
+        return chatbot
 
     async def aclose(self) -> None:
         await self._client.aclose()
