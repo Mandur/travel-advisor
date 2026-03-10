@@ -20,10 +20,10 @@ logger = setup_logging("property-planning-agent")
 
 
 def _agent_version() -> str:
-  try:
-    return version("property-planning-agent")
-  except PackageNotFoundError:
-    return "unknown"
+    try:
+        return version("property-planning-agent")
+    except PackageNotFoundError:
+        return "unknown"
 
 PROPERTY_PLANNING_INSTRUCTIONS = """\
 You are a hotel analytics agent for a hospitality platform.
