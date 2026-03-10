@@ -19,7 +19,13 @@ members = [
     "advisor/agents/advisor_agent",
     "advisor/agents/rfp",
     "advisor/agents/property_planning",
+    "advisor/utils/token_fatcher",
 ]
 
 [tool.pyright]
 include = ["advisor"]
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.408",
+]
