@@ -15,6 +15,7 @@ members = [
     "advisor/shared",
     "advisor/tools/meeting_broker",
     "advisor/tools/travel_advisor",
+    "advisor/tools/hotelligence_advisor",
     "advisor/agents/advisor_agent",
     "advisor/agents/rfp",
     "advisor/agents/property_planning",

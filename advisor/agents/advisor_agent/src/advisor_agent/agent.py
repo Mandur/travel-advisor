@@ -20,13 +20,20 @@ logger = setup_logging("advisor-agent")
 
 SUPERVISOR_INSTRUCTIONS = """\
 You are a helpful assistant for a hospitality platform.
-Users ask questions about RFP management and property/venue planning.
+Users ask questions about RFP management and property/venue planning and hotel analytics.
 Use the specialist tools to gather information, then respond directly to the user.
 
-Rules:
+Routing rules:
+- Use rfp_agent for anything about RFPs, meetings, proposals, bids, and event management.
+- Use property_planning_agent for hotel performance analytics, occupancy, revenue,
+  segmentation, forecasts, pace reports, and BI questions about a specific property.
+  ALWAYS pass the full user message including any property IDs mentioned.
+
+Response rules:
 - NEVER mention tool names (rfp_agent, property_planning_agent)
 - NEVER say "I called a tool" or "The specialist said"
 - NEVER reveal internal API names, agent names, or system names
+- NEVER ask the user to clarify when property IDs are already in their message
 - Synthesize information from specialists into one coherent, helpful response
 - If a capability failed, describe the gap in user terms
 - Be concise and professional"""
@@ -73,7 +80,10 @@ def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "Compiled
 
     @tool
     async def property_planning_agent(query: str, config: RunnableConfig) -> str:
-        """Use for venue selection, space planning, room layout configuration, and property-level planning tasks."""
+        """Use for hotel performance analytics, occupancy, revenue, segmentation,
+        forecasts, pace reports, and BI questions about a specific property.
+        Also handles venue selection and space planning tasks.
+        Always pass property IDs (tcPropId, ownedPropId) when mentioned by the user."""
         try:
             cfg = get_config()
             if cfg.property_planning_agent_url:
