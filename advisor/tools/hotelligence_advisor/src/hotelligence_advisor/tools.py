@@ -14,7 +14,8 @@ logger = setup_logging("hotelligence-advisor")
 
 @tool
 async def query_hotelligence_advisor(
-    property_id: str,
+    tc_prop_id: int,
+    owned_prop_id: int,
     message: str,
 ) -> dict[str, Any]:
     """Query the Hotelligence360 advisor for hotel performance insights.
@@ -23,7 +24,8 @@ async def query_hotelligence_advisor(
     forecasts, pace reports, and other BI analytics for a specific property.
 
     Args:
-        property_id: The TravelClick property ID (tcPropId) as a string.
+        tc_prop_id: The TravelClick property ID (integer), e.g. 12917.
+        owned_prop_id: The owned property ID (integer), e.g. 306393.
         message: Natural language question, e.g. "Occ by Segment next 2 months".
 
     Returns:
@@ -32,10 +34,14 @@ async def query_hotelligence_advisor(
           - ``bubble_prompts``: Suggested follow-up questions (list of strings).
     """
     client = get_hotelligence_client()
-    result = await client.query_chatbot(property_id=property_id, message=message)
+    result = await client.query_chatbot(
+        tc_prop_id=tc_prop_id,
+        owned_prop_id=owned_prop_id,
+        message=message,
+    )
     logger.info(
         "Hotelligence query for property %s: %r -> %d chars",
-        property_id,
+        tc_prop_id,
         message,
         len(result.get("assistance_response", "")),
     )

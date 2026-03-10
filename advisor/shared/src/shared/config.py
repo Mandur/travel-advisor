@@ -39,7 +39,7 @@ class AgentConfig(BaseSettings):
     # Hotelligence360 GraphQL advisor endpoint
     hotelligence_graphql_url: Annotated[str, Field(validation_alias="HOTELLIGENCE_GRAPHQL_URL")] = "https://hotelligence360-stage.travelclick.com/chatbot/graphql"
     hotelligence_bearer_token: Annotated[str, Field(validation_alias="HOTELLIGENCE_BEARER_TOKEN")] = ""
-    hotelligence_timeout: Annotated[float, Field(validation_alias="HOTELLIGENCE_TIMEOUT")] = 60.0
+    hotelligence_timeout: Annotated[float, Field(validation_alias="HOTELLIGENCE_TIMEOUT")] = 120.0
     # SSL / TLS
     # Set SSL_VERIFY=false to disable certificate verification (e.g. corporate proxies).
     # Set SSL_CA_BUNDLE=/path/to/ca-bundle.crt to trust a custom CA (preferred over disabling).

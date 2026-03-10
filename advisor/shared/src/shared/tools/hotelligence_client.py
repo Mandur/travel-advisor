@@ -10,8 +10,8 @@ import httpx
 from shared.config import get_config
 
 _CHATBOT_QUERY = """
-query chatbot($property_id: String!, $message: String!) {
-  chatbot(property_id: $property_id, message: $message) {
+query chatbot($property: PropertyInput!, $message: String!) {
+  chatbot(property: $property, message: $message) {
     assistance_response
     bubble_prompts
   }
@@ -44,13 +44,15 @@ class HotelligenceClient:
 
     async def query_chatbot(
         self,
-        property_id: str,
+        tc_prop_id: int,
+        owned_prop_id: int,
         message: str,
     ) -> dict[str, Any]:
         """Send a chatbot query to the Hotelligence360 GraphQL endpoint.
 
         Args:
-            property_id: The TravelClick property ID string.
+            tc_prop_id: The TravelClick property ID (integer).
+            owned_prop_id: The owned property ID (integer).
             message: Natural language question to ask the advisor.
 
         Returns:
@@ -58,12 +60,15 @@ class HotelligenceClient:
 
         Raises:
             httpx.HTTPStatusError: On non-2xx responses.
-            KeyError: If the response shape is unexpected.
+            RuntimeError: If the GraphQL response contains errors.
         """
         payload = {
             "query": _CHATBOT_QUERY,
             "variables": {
-                "property_id": property_id,
+                "property": {
+                    "tcPropId": tc_prop_id,
+                    "ownedPropId": owned_prop_id,
+                },
                 "message": message,
             },
         }
