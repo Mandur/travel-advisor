@@ -17,11 +17,17 @@ if TYPE_CHECKING:
     from langgraph.checkpoint.base import BaseCheckpointSaver
 
 logger = setup_logging("advisor-agent")
+AGENT_VERSION = "0.1.0"
 
 SUPERVISOR_INSTRUCTIONS = """\
 You are a helpful assistant for a hospitality platform.
 Users ask questions about RFP management and property/venue planning and hotel analytics.
 Use the specialist tools to gather information, then respond directly to the user.
+
+Version rules:
+- If the user asks for your version (or does not name a sub-agent), call agent_version.
+- If the user explicitly asks for the RFP agent version, call rfp_agent with that question.
+- If the user explicitly asks for the property planning agent version, call property_planning_agent with that question.
 
 Routing rules:
 - Use rfp_agent for anything about RFPs, meetings, proposals, bids, and event management.
@@ -94,10 +100,15 @@ def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "Compiled
             logger.exception("property_planning_agent tool failed")
             return f"Property planning agent is temporarily unavailable: {exc}"
 
+    @tool
+    def agent_version() -> str:
+        """Return this agent's version."""
+        return f"Advisor Agent version {AGENT_VERSION}"
+
     supervisor_llm = create_llm(config.gpt5_2_chat_deployment)
     graph = _build_agent(
         supervisor_llm,
-        [rfp_agent, property_planning_agent],
+        [rfp_agent, property_planning_agent, agent_version],
         system_prompt=SUPERVISOR_INSTRUCTIONS,
         checkpointer=checkpointer,
     )

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from langchain.agents import create_agent as _build_agent
+from langchain_core.tools import tool
 
 from hotelligence_advisor.tools import HOTELLIGENCE_TOOLS
 from shared.config import get_config
@@ -15,11 +16,15 @@ if TYPE_CHECKING:
     from langgraph.checkpoint.base import BaseCheckpointSaver
 
 logger = setup_logging("property-planning-agent")
+AGENT_VERSION = "0.1.0"
 
 PROPERTY_PLANNING_INSTRUCTIONS = """\
 You are a hotel analytics agent for a hospitality platform.
 You help users with hotel performance data: occupancy, ADR, RevPAR, revenue,
 segmentation, pace, LOS, channel mix, competitive set, forecasts, and more.
+
+## Version handling
+If asked about this agent's version/build/release, call agent_version.
 
 ## When to call query_hotelligence_advisor
 Call it on the FIRST step when the user asks ANY hotel analytics question.
@@ -41,13 +46,19 @@ Do NOT reply with text first — call the tool immediately.
   and there is no active thread_id."""
 
 
+@tool
+def agent_version() -> str:
+    """Return this agent's version."""
+    return f"Property Planning Agent version {AGENT_VERSION}"
+
+
 def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":
     """Create and return the property planning agent as a compiled LangGraph."""
     config = get_config()
     llm = create_llm(config.gpt5_mini_deployment)
     graph = _build_agent(
         llm,
-        HOTELLIGENCE_TOOLS,
+      [*HOTELLIGENCE_TOOLS, agent_version],
         system_prompt=PROPERTY_PLANNING_INSTRUCTIONS,
         checkpointer=checkpointer,
     )
