@@ -4,11 +4,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from copilotkit import CopilotKitMiddleware
 from langchain.agents import create_agent as _build_agent
 
 from shared.config import get_config
 from shared.utils import create_llm, setup_logging
 from meeting_broker.agent import _RFP_TOOLS
+
 
 if TYPE_CHECKING:
     from langgraph.graph.state import CompiledStateGraph
@@ -30,13 +32,16 @@ briefly summarize what was found before fetching full details).
 Win Probability (20%), Completeness (20%), Urgency (15%)."""
 
 
-def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":
+def create_agent(
+    checkpointer: "BaseCheckpointSaver | None" = None,
+) -> "CompiledStateGraph":
     """Create and return the RFP agent as a compiled LangGraph."""
     config = get_config()
     llm = create_llm(config.gpt5_mini_deployment, use_previous_response_id=True)
     graph = _build_agent(
         llm,
         _RFP_TOOLS,
+        middleware=[CopilotKitMiddleware()],
         system_prompt=RFP_AGENT_INSTRUCTIONS,
         checkpointer=checkpointer,
     )

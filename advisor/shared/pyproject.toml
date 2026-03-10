@@ -23,6 +23,8 @@ dependencies = [
     "microsoft-agents-hosting-core>=0.8.0",
     "microsoft-agents-hosting-fastapi>=0.8.0",
     "microsoft-agents-authentication-msal>=0.8.0",
+    # CopilotKit integration
+    "copilotkit>=0.1.77",
 ]
 
 [build-system]

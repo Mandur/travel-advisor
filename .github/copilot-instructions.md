@@ -57,6 +57,7 @@ User -> Advisor Agent (gpt-5.2-chat, supervisor)
 ## Key Conventions
 
 - **NEVER use `create_react_agent` from `langgraph.prebuilt`.** It is deprecated since LangGraph v1.0. Use `from langchain.agents import create_agent` instead. Key differences: the `prompt` parameter is now `system_prompt` (accepts `str` directly, no need to wrap in `SystemMessage`), and `recursion_limit` is no longer a constructor parameter. Import as `_build_agent` to avoid shadowing the local `create_agent()` function.
+- **Create agents with `CopilotKitMiddleware`** by passing `middleware=[CopilotKitMiddleware()]` to the langchain.agents.create_agent function. This ensures the CopilotKit front-end can pass custom frontend-related tools to the agents.
 - **Agent structure:** Each agent package in `advisor/agents/` follows the same layout: `agent.py` defines the agent (instructions + tools via `create_agent()`), `main.py` uses `shared.app_factory.create_app()` to expose it as a FastAPI app with `/chat` and `/health` endpoints.
 - **Tool structure:** Each tool package in `advisor/tools/` contains `agent.py` with `@tool`-decorated async functions. Tools are library packages imported by agents -- they have no `main.py` or `Dockerfile`.
 - **Configuration:** All config flows through `shared.config.AgentConfig` (Pydantic Settings), which reads from environment variables and `.env` files. Use `get_config()` to access the cached singleton.
