@@ -58,7 +58,7 @@ def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "Compiled
     llm = create_llm(config.gpt5_mini_deployment)
     graph = _build_agent(
         llm,
-      [*HOTELLIGENCE_TOOLS, agent_version],
+        [*HOTELLIGENCE_TOOLS, agent_version],
         system_prompt=PROPERTY_PLANNING_INSTRUCTIONS,
         checkpointer=checkpointer,
     )
