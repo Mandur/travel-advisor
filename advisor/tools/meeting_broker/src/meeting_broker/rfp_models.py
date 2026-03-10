@@ -102,18 +102,30 @@ class SnapshotSection(RfpBase):
 class RfpSummary(RfpBase):
     id: str | None = None
     status: str | None = None
+    internalId: str | None = None
+    externalRfpId: str | None = None
     meetingName: str | None = None
+    meetingId: str | None = None
     ownerName: str | None = None
     ownerId: str | None = None
     accountName: str | None = None
     accountId: str | None = None
     agencyName: str | None = None
+    agencyId: str | None = None
+    agentName: str | None = None
+    agentId: str | None = None
     contactName: str | None = None
+    contactId: str | None = None
+    locationName: str | None = None
+    locationId: str | None = None
+    channelName: str | None = None
+    channelId: str | None = None
     arrivalDate: str | None = None
     receivedDate: str | None = None
     budget: float | None = None
     rate: float | None = None
     proposalSentDate: str | None = None
+    rfpStatusMilestoneId: int | None = None
     rfpMilestone: str | None = None
     rfpMilestoneTypeId: int | None = None
     milestoneStatusChangeDate: str | None = None
@@ -145,6 +157,15 @@ class RfpDetails(RfpBase):
     internalId: str | None = None
     owner: PersonSummary | None = None
     channel: Channel | None = None
+    eventBlocks: list[dict[str, Any]] | None = None
+    guestRoomBlocks: list[dict[str, Any]] | None = None
+    meeting: dict[str, Any] | None = None
+    questions: list[Question] | None = None
+    releaseDate: str | None = None
+    status: str | None = None
+    sender: dict[str, Any] | None = None
+    location: dict[str, Any] | None = None
+    calculatedBudget: float | None = None
     rfpMilestone: RfpMilestone | None = None
     rfpNextStep: RfpNextStep | None = None
 

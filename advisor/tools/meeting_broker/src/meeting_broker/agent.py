@@ -79,7 +79,7 @@ async def search_rfps(
         rate: Guest room rate filter.
         proposal_sent_date: Date the proposal was first sent.
         external_rfp_id: External RFP identifier.
-        internal_id: Integer identifier for the RFP.
+        internal_id: Internal RFP identifier.
         location_name: Name of the receiving location.
         limit: Maximum number of results to return.
         sort_by: Column to sort results by.
