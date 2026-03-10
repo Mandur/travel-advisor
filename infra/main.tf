@@ -27,18 +27,16 @@ provider "azapi" {}
 # Current Azure AD tenant — used when registering the bot with UserAssignedMSI
 data "azurerm_client_config" "current" {}
 
-resource "azurerm_resource_group" "main" {
+data "azurerm_resource_group" "main" {
   name     = var.resource_group_name
-  location = var.location
-  tags     = var.tags
 }
 
 module "acr" {
   source = "./modules/acr"
 
   name                = replace(var.base_name, "-", "")
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
+  location            = data.azurerm_resource_group.main.location
+  resource_group_name = data.azurerm_resource_group.main.name
   tags                = var.tags
 }
 
@@ -46,8 +44,8 @@ module "foundry" {
   source = "./modules/foundry"
 
   base_name           = var.base_name
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
+  location            = data.azurerm_resource_group.main.location
+  resource_group_name = data.azurerm_resource_group.main.name
   key_vault_id        = module.keyvault.vault_id
   tags                = var.tags
 }
@@ -56,16 +54,16 @@ module "monitoring" {
   source = "./modules/monitoring"
 
   base_name           = var.base_name
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
+  location            = data.azurerm_resource_group.main.location
+  resource_group_name = data.azurerm_resource_group.main.name
   tags                = var.tags
 }
 
 module "postgres" {
   source = "./modules/postgres"
   base_name           = var.base_name
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
+  location            = data.azurerm_resource_group.main.location
+  resource_group_name = data.azurerm_resource_group.main.name
   tags                = var.tags
 }
 
@@ -73,8 +71,8 @@ module "keyvault" {
   source = "./modules/keyvault"
 
   base_name           = var.base_name
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
+  location            = data.azurerm_resource_group.main.location
+  resource_group_name = data.azurerm_resource_group.main.name
   tags                = var.tags
 }
 
@@ -82,8 +80,8 @@ module "keyvault" {
 
 resource "azurerm_user_assigned_identity" "agents" {
   name                = "${var.base_name}-identity"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
+  location            = data.azurerm_resource_group.main.location
+  resource_group_name = data.azurerm_resource_group.main.name
   tags                = var.tags
 }
 
@@ -124,8 +122,8 @@ module "appservice" {
   source = "./modules/appservice"
 
   base_name                      = var.base_name
-  location                       = azurerm_resource_group.main.location
-  resource_group_name            = azurerm_resource_group.main.name
+  location                       = data.azurerm_resource_group.main.location
+  resource_group_name            = data.azurerm_resource_group.main.name
   acr_login_server               = module.acr.login_server
   managed_identity_id            = azurerm_user_assigned_identity.agents.id
   managed_identity_client_id     = azurerm_user_assigned_identity.agents.client_id
@@ -148,7 +146,7 @@ module "agents" {
 
   foundry_project_name = module.foundry.project_name
   acr_login_server     = module.acr.login_server
-  location             = azurerm_resource_group.main.location
+  location             = data.azurerm_resource_group.main.location
   tags                 = var.tags
 }
 
@@ -158,7 +156,7 @@ module "bot" {
   source = "./modules/bot"
 
   base_name                  = var.base_name
-  resource_group_name        = azurerm_resource_group.main.name
+  resource_group_name        = data.azurerm_resource_group.main.name
   advisor_agent_fqdn         = module.appservice.container_app_urls["advisor-agent"]
   managed_identity_id        = azurerm_user_assigned_identity.agents.id
   managed_identity_client_id = azurerm_user_assigned_identity.agents.client_id
