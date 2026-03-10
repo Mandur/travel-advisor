@@ -1,5 +1,5 @@
 """Meeting broker -- wraps the RFP API as async agent tools."""
-
+# Ver 1.3
 from __future__ import annotations
 
 from functools import lru_cache
@@ -29,10 +29,29 @@ from meeting_broker.rfp_models import (
 
 logger = setup_logging("meeting-broker")
 
+_DEFAULT_PAGE_LIMIT = 100
+
+
+def _count_active_filters(params: dict[str, Any]) -> int:
+    return sum(1 for value in params.values() if value not in (None, "", []))
+
+
+def _extract_result_count(result: dict[str, Any]) -> int | None:
+    if "count" in result and isinstance(result["count"], int):
+        return result["count"]
+    if "totalCount" in result and isinstance(result["totalCount"], int):
+        return result["totalCount"]
+    if "items" in result and isinstance(result["items"], list):
+        return len(result["items"])
+    if "rfps" in result and isinstance(result["rfps"], list):
+        return len(result["rfps"])
+    return None
+
 
 @lru_cache(maxsize=1)
 def _client() -> ApiClient:
     config = get_config()
+    logger.info("Initializing RFP API client base_url=%s timeout=%s", config.rfp_api_base_url, config.rfp_api_timeout)
     return ApiClient(
         base_url=config.rfp_api_base_url,
         bearer_token=config.bearer_token,
@@ -41,6 +60,65 @@ def _client() -> ApiClient:
 
 
 # -- Search & retrieve --------------------------------------------------------
+
+
+async def _search_rfps_impl(
+    meeting_name: str | None = None,
+    account_name: str | None = None,
+    status: str | None = None,
+    arrival_date: str | None = None,
+    received_date: str | None = None,
+    total_budget: str | None = None,
+    rate: str | None = None,
+    proposal_sent_date: str | None = None,
+    external_rfp_id: str | None = None,
+    internal_id: str | None = None,
+    location_name: str | None = None,
+    limit: int | None = None,
+    sort_by: str | None = None,
+    rfp_milestone: str | None = None,
+    next_step_name: str | None = None,
+    next_step_due_date: str | None = None,
+    continuation_token: str | None = None,
+    is_next_step_overdue: bool | None = None,
+    is_export: bool | None = None,
+) -> dict[str, Any]:
+    effective_limit = _DEFAULT_PAGE_LIMIT if limit is None else limit
+    params = {
+        "meetingName": meeting_name,
+        "accountName": account_name,
+        "status": status,
+        "arrivalDate": arrival_date,
+        "receivedDate": received_date,
+        "totalBudget": total_budget,
+        "rate": rate,
+        "proposalSentDate": proposal_sent_date,
+        "externalRfpId": external_rfp_id,
+        "internalId": internal_id,
+        "locationName": location_name,
+        "limit": effective_limit,
+        "sortBy": sort_by,
+        "rfpMilestone": rfp_milestone,
+        "nextStepName": next_step_name,
+        "nextStepDueDate": next_step_due_date,
+        "continuationToken": continuation_token,
+        "isNextStepOverdue": is_next_step_overdue,
+        "isExport": is_export,
+    }
+    logger.info(
+        "Searching RFPs active_filters=%d limit=%d continuation=%s",
+        _count_active_filters(params),
+        effective_limit,
+        continuation_token is not None,
+    )
+
+    raw = await _client().get(
+        "/rfps",
+        params=params,
+    )
+    result = SearchRfpResponse.model_validate(raw).model_dump()
+    logger.info("RFP search complete result_count=%s", _extract_result_count(result))
+    return result
 
 
 @tool
@@ -79,9 +157,9 @@ async def search_rfps(
         rate: Guest room rate filter.
         proposal_sent_date: Date the proposal was first sent.
         external_rfp_id: External RFP identifier.
-        internal_id: Integer identifier for the RFP.
+        internal_id: Internal RFP identifier.
         location_name: Name of the receiving location.
-        limit: Maximum number of results to return.
+        limit: Maximum number of results to return (defaults to 100).
         sort_by: Column to sort results by.
         rfp_milestone: Milestone type name (e.g. "Published", "Viewed").
         next_step_name: Partial name of the next step action.
@@ -93,31 +171,76 @@ async def search_rfps(
     Returns:
         Dict with a list of RFP summaries and total count.
     """
-    raw = await _client().get(
-        "/rfps",
-        params={
-            "meetingName": meeting_name,
-            "accountName": account_name,
-            "status": status,
-            "arrivalDate": arrival_date,
-            "receivedDate": received_date,
-            "totalBudget": total_budget,
-            "rate": rate,
-            "proposalSentDate": proposal_sent_date,
-            "externalRfpId": external_rfp_id,
-            "internalId": internal_id,
-            "locationName": location_name,
-            "limit": limit,
-            "sortBy": sort_by,
-            "rfpMilestone": rfp_milestone,
-            "nextStepName": next_step_name,
-            "nextStepDueDate": next_step_due_date,
-            "continuationToken": continuation_token,
-            "isNextStepOverdue": is_next_step_overdue,
-            "isExport": is_export,
-        },
+    return await _search_rfps_impl(
+        meeting_name=meeting_name,
+        account_name=account_name,
+        status=status,
+        arrival_date=arrival_date,
+        received_date=received_date,
+        total_budget=total_budget,
+        rate=rate,
+        proposal_sent_date=proposal_sent_date,
+        external_rfp_id=external_rfp_id,
+        internal_id=internal_id,
+        location_name=location_name,
+        limit=limit,
+        sort_by=sort_by,
+        rfp_milestone=rfp_milestone,
+        next_step_name=next_step_name,
+        next_step_due_date=next_step_due_date,
+        continuation_token=continuation_token,
+        is_next_step_overdue=is_next_step_overdue,
+        is_export=is_export,
     )
-    return SearchRfpResponse.model_validate(raw).model_dump()
+
+
+@tool
+async def list_rfps(
+    meeting_name: str | None = None,
+    account_name: str | None = None,
+    status: str | None = None,
+    arrival_date: str | None = None,
+    received_date: str | None = None,
+    total_budget: str | None = None,
+    rate: str | None = None,
+    proposal_sent_date: str | None = None,
+    external_rfp_id: str | None = None,
+    internal_id: str | None = None,
+    location_name: str | None = None,
+    limit: int | None = None,
+    sort_by: str | None = None,
+    rfp_milestone: str | None = None,
+    next_step_name: str | None = None,
+    next_step_due_date: str | None = None,
+    continuation_token: str | None = None,
+    is_next_step_overdue: bool | None = None,
+    is_export: bool | None = None,
+) -> dict[str, Any]:
+    """List RFPs matching the supplied filters.
+
+    Alias of search_rfps with identical parameters and behavior.
+    """
+    return await _search_rfps_impl(
+        meeting_name=meeting_name,
+        account_name=account_name,
+        status=status,
+        arrival_date=arrival_date,
+        received_date=received_date,
+        total_budget=total_budget,
+        rate=rate,
+        proposal_sent_date=proposal_sent_date,
+        external_rfp_id=external_rfp_id,
+        internal_id=internal_id,
+        location_name=location_name,
+        limit=limit,
+        sort_by=sort_by,
+        rfp_milestone=rfp_milestone,
+        next_step_name=next_step_name,
+        next_step_due_date=next_step_due_date,
+        continuation_token=continuation_token,
+        is_next_step_overdue=is_next_step_overdue,
+        is_export=is_export,
+    )
 
 
 @tool
@@ -131,6 +254,7 @@ async def get_rfp(rfp_id: str, children: str | None = None) -> dict[str, Any]:
     Returns:
         Dict with the full RFP detail object.
     """
+    logger.info("Fetching RFP details rfp_id=%s include_children=%s", rfp_id, children is not None)
     raw = await _client().get(f"/rfps/{rfp_id}", params={"children": children})
     return GetRfpResponse.model_validate(raw).model_dump()
 
@@ -153,6 +277,7 @@ async def get_rfp_status_counts(
     Returns:
         Dict with per-status counts.
     """
+    logger.info("Fetching status counts start_date=%s end_date=%s", start_date, end_date)
     raw = await _client().get(
         "/rfps/status-counts",
         params={
@@ -185,6 +310,7 @@ async def get_rfp_status_revenues(
     Returns:
         Dict with revenue per status.
     """
+    logger.info("Fetching status revenues start_date=%s end_date=%s is_actual=%s", start_date, end_date, is_actual)
     raw = await _client().get(
         "/rfps/status-revenues",
         params={
@@ -222,6 +348,7 @@ async def get_rfp_additional_information(rfp_id: str) -> dict[str, Any]:
     Returns:
         Dict with extra key/value fields.
     """
+    logger.info("Fetching additional information rfp_id=%s", rfp_id)
     raw = await _client().get(f"/rfps/{rfp_id}/additional-information")
     return AdditionalInfoResponse.model_validate(raw).model_dump()
 
@@ -236,15 +363,17 @@ async def get_rfp_team(
 
     Args:
         rfp_id: UUID of the RFP.
-        limit: Maximum number of team members to return (default 100).
+        limit: Maximum number of team members to return (defaults to 100).
         continuation_token: Token for the next page of results.
 
     Returns:
         Dict with team members and total count.
     """
+    effective_limit = _DEFAULT_PAGE_LIMIT if limit is None else limit
+
     raw = await _client().get(
         f"/rfps/{rfp_id}/team",
-        params={"limit": limit, "continuationToken": continuation_token},
+        params={"limit": effective_limit, "continuationToken": continuation_token},
     )
     return TeamResponse.model_validate(raw).model_dump()
 
@@ -315,7 +444,9 @@ async def update_rfp(rfp_id: str, rfp_details: dict[str, Any]) -> dict[str, Any]
     Returns:
         Dict with success status.
     """
+    logger.info("Updating RFP rfp_id=%s updated_fields=%d", rfp_id, len(rfp_details))
     await _client().put(f"/rfps/{rfp_id}", json={"data": rfp_details})
+    logger.info("RFP update complete rfp_id=%s", rfp_id)
     return NoContentResponse().model_dump()
 
 
@@ -342,6 +473,7 @@ async def update_rfp_status(
     Returns:
         Dict with a reference to the updated RFP.
     """
+    logger.info("Updating RFP status rfp_id=%s status=%s", rfp_id, status)
     body: dict[str, Any] = {
         "data": {
             "rfpStatusChange": {
@@ -353,6 +485,7 @@ async def update_rfp_status(
         }
     }
     raw = await _client().put(f"/rfps/{rfp_id}/status", json=body)
+    logger.info("RFP status update complete rfp_id=%s", rfp_id)
     return PutResponse.model_validate(raw).model_dump()
 
 
@@ -367,7 +500,9 @@ async def reassign_rfp_owner(rfp_id: str, new_owner: dict[str, Any]) -> dict[str
     Returns:
         Dict with a reference to the updated RFP.
     """
+    logger.info("Reassigning RFP owner rfp_id=%s new_owner_id=%s", rfp_id, new_owner.get("id"))
     raw = await _client().put(f"/rfps/{rfp_id}/owner", json={"data": {"owner": new_owner}})
+    logger.info("RFP owner reassignment complete rfp_id=%s", rfp_id)
     return PutResponse.model_validate(raw).model_dump()
 
 
@@ -382,10 +517,12 @@ async def update_rfp_question_answers(rfp_id: str, questions: list[dict[str, Any
     Returns:
         Dict with the updated question list.
     """
+    logger.info("Updating RFP question answers rfp_id=%s questions=%d", rfp_id, len(questions))
     raw = await _client().put(
         f"/rfps/{rfp_id}/questions/answers",
         json={"data": {"questions": questions}},
     )
+    logger.info("RFP question answers update complete rfp_id=%s", rfp_id)
     return UpdateQuestionsResponse.model_validate(raw).model_dump()
 
 
@@ -405,10 +542,12 @@ async def add_rfp_team_member(
     Returns:
         Dict with the new team member ID.
     """
+    logger.info("Adding RFP team member rfp_id=%s user_id=%s role_supplied=%s", rfp_id, user_id, role_id is not None)
     member: dict[str, Any] = {"person": {"id": user_id}}
     if role_id is not None:
         member["role"] = {"id": role_id}
     raw = await _client().post(f"/rfps/{rfp_id}/team/members", json={"data": member})
+    logger.info("RFP team member added rfp_id=%s", rfp_id)
     return TeamMemberResponse.model_validate(raw).model_dump()
 
 
@@ -423,7 +562,9 @@ async def update_rfp_team_members(rfp_id: str, members: list[dict[str, Any]]) ->
     Returns:
         Dict with success status.
     """
+    logger.info("Updating RFP team members rfp_id=%s member_count=%d", rfp_id, len(members))
     await _client().put(f"/rfps/{rfp_id}/team/members", json={"data": members})
+    logger.info("RFP team members update complete rfp_id=%s", rfp_id)
     return NoContentResponse().model_dump()
 
 
@@ -438,7 +579,9 @@ async def remove_rfp_team_member(rfp_id: str, user_id: str) -> dict[str, Any]:
     Returns:
         Dict with success status.
     """
+    logger.info("Removing RFP team member rfp_id=%s user_id=%s", rfp_id, user_id)
     await _client().delete(f"/rfps/{rfp_id}/team/members/{user_id}")
+    logger.info("RFP team member removed rfp_id=%s user_id=%s", rfp_id, user_id)
     return NoContentResponse().model_dump()
 
 
@@ -446,6 +589,7 @@ async def remove_rfp_team_member(rfp_id: str, user_id: str) -> dict[str, Any]:
 
 _RFP_TOOLS = [
     search_rfps,
+    list_rfps,
     get_rfp,
     get_rfp_additional_information,
     update_rfp,
