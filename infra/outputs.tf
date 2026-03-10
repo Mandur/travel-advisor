@@ -10,12 +10,12 @@ output "foundry_project_endpoint" {
   value = module.foundry.project_endpoint
 }
 
-output "postgres_server_fqdn" {
-  value = module.postgres.server_fqdn
+output "redis_host_name" {
+  value = module.redis.host_name
 }
 
-output "postgres_connection_string" {
-  value     = module.postgres.connection_string
+output "redis_url" {
+  value     = module.redis.connection_string
   sensitive = true
 }
 

@@ -61,8 +61,8 @@ module "monitoring" {
   tags                = var.tags
 }
 
-module "postgres" {
-  source = "./modules/postgres"
+module "redis" {
+  source = "./modules/redis"
   base_name           = var.base_name
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
@@ -115,8 +115,8 @@ resource "azurerm_role_assignment" "kv_secrets" {
   principal_id         = azurerm_user_assigned_identity.agents.principal_id
 }
 
-# No additional RBAC needed for PostgreSQL — the connection string carries
-# the admin credentials; access is controlled via firewall rules.
+# No additional RBAC needed for Redis runtime access — the application uses
+# access keys embedded in the Redis URL.
 
 # --- Container Apps for Agents ---
 
@@ -131,7 +131,7 @@ module "appservice" {
   managed_identity_client_id     = azurerm_user_assigned_identity.agents.client_id
   project_endpoint               = module.foundry.project_endpoint
   azure_openai_endpoint          = module.foundry.openai_endpoint
-  postgres_connection_string     = module.postgres.connection_string
+  redis_url                      = module.redis.connection_string
   keyvault_uri                   = module.keyvault.vault_uri
   appinsights_connection_string  = module.monitoring.application_insights_connection_string
   bot_app_id                     = azurerm_user_assigned_identity.agents.client_id

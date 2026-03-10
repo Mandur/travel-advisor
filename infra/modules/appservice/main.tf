@@ -40,8 +40,8 @@ variable "project_endpoint" {
   default     = ""
 }
 
-variable "postgres_connection_string" {
-  description = "PostgreSQL connection string for the LangGraph checkpointer"
+variable "redis_url" {
+  description = "Redis URL for the LangGraph checkpointer"
   type        = string
   default     = ""
   sensitive   = true
@@ -145,8 +145,8 @@ locals {
       value = var.project_endpoint
     },
     {
-      name  = "POSTGRES_CONNECTION_STRING"
-      value = var.postgres_connection_string
+      name  = "REDIS_URL"
+      value = var.redis_url
     },
     {
       name  = "KEYVAULT_URI"

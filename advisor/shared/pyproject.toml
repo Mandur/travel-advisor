@@ -15,8 +15,8 @@ dependencies = [
     "langchain>=0.3",
     "langchain-openai>=0.3",
     "langchain-core>=0.3",
-    "langgraph-checkpoint-postgres",
-    "psycopg[binary,pool]",
+    "langgraph-checkpoint-redis>=0.3.8",
+    "redis>=5.2.1",
     "aiohttp>=3.9",
     "uvicorn>=0.30",
     # Microsoft 365 Agents SDK — Teams / Bot Service adapter (advisor-agent only)

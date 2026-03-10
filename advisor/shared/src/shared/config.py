@@ -31,7 +31,7 @@ class AgentConfig(BaseSettings):
     rfp_api_timeout: Annotated[float, Field(validation_alias="RFP_API_TIMEOUT")] = 60.0
     # LangGraph / Azure OpenAI inference
     azure_openai_api_version: str = "2025-03-01-preview"
-    postgres_connection_string: Annotated[str, Field(validation_alias="POSTGRES_CONNECTION_STRING")] = ""
+    redis_url: Annotated[str, Field(validation_alias="REDIS_URL")] = ""
     # Sub-agent dispatch: empty = in-process (import), URL = HTTP call to /chat
     rfp_agent_url: Annotated[str, Field(validation_alias="RFP_AGENT_URL")] = ""
     property_planning_agent_url: Annotated[str, Field(validation_alias="PROPERTY_PLANNING_AGENT_URL")] = ""

@@ -32,7 +32,7 @@ Rules:
 - Be concise and professional"""
 
 
-def create_agent(checkpointer: "BaseCheckpointSaver") -> "CompiledStateGraph":
+def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":
     """Create the routing supervisor agent with dual-mode sub-agent dispatch.
 
     Sub-agents are called in-process when their URL config is empty,
