@@ -36,6 +36,10 @@ class AgentConfig(BaseSettings):
     # Sub-agent dispatch: empty = in-process (import), URL = HTTP call to /chat
     rfp_agent_url: Annotated[str, Field(validation_alias="RFP_AGENT_URL")] = ""
     property_planning_agent_url: Annotated[str, Field(validation_alias="PROPERTY_PLANNING_AGENT_URL")] = ""
+    # Hotelligence360 GraphQL advisor endpoint
+    hotelligence_graphql_url: Annotated[str, Field(validation_alias="HOTELLIGENCE_GRAPHQL_URL")] = "https://hotelligence360-stage.travelclick.com/chatbot/graphql"
+    hotelligence_bearer_token: Annotated[str, Field(validation_alias="HOTELLIGENCE_BEARER_TOKEN")] = ""
+    hotelligence_timeout: Annotated[float, Field(validation_alias="HOTELLIGENCE_TIMEOUT")] = 120.0
     # SSL / TLS
     # Set SSL_VERIFY=false to disable certificate verification (e.g. corporate proxies).
     # Set SSL_CA_BUNDLE=/path/to/ca-bundle.crt to trust a custom CA (preferred over disabling).
