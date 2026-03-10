@@ -33,12 +33,15 @@ def placeholder_tool(query: str) -> str:
     Returns:
         A placeholder response.
     """
+    logger.info("Placeholder tool invoked query_length=%d", len(query))
     return f"Property planning agent received: {query}"
 
 
 def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":
     """Create and return the property planning agent as a compiled LangGraph."""
+    logger.info("Initializing property planning agent checkpointer_enabled=%s", checkpointer is not None)
     config = get_config()
+    logger.info("Using deployment for property planning agent deployment=%s", config.gpt5_mini_deployment)
     llm = create_llm(config.gpt5_mini_deployment)
     graph = _build_agent(
         llm,
@@ -46,5 +49,5 @@ def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "Compiled
         system_prompt=PROPERTY_PLANNING_INSTRUCTIONS,
         checkpointer=checkpointer,
     )
-    logger.info("Property planning agent created successfully")
+    logger.info("Property planning agent created successfully tool_count=%d", 1)
     return graph

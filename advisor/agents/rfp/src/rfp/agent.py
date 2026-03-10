@@ -35,7 +35,9 @@ Win Probability (20%), Completeness (20%), Urgency (15%)."""
 
 def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":
     """Create and return the RFP agent as a compiled LangGraph."""
+    logger.info("Initializing RFP agent checkpointer_enabled=%s", checkpointer is not None)
     config = get_config()
+    logger.info("Using deployment for RFP agent deployment=%s", config.gpt5_mini_deployment)
     llm = create_llm(config.gpt5_mini_deployment, use_previous_response_id=True)
     graph = _build_agent(
         llm,
@@ -43,5 +45,9 @@ def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "Compiled
         system_prompt=RFP_AGENT_INSTRUCTIONS,
         checkpointer=checkpointer,
     )
-    logger.info("RFP agent created with %d meeting broker tools", len(_RFP_TOOLS))
+    logger.info(
+        "RFP agent created with %d meeting broker tools previous_response_id=%s",
+        len(_RFP_TOOLS),
+        True,
+    )
     return graph
