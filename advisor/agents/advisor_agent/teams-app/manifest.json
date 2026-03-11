@@ -31,7 +31,7 @@
 
   "bots": [
     {
-      "botId": "f85478ca-c646-48ef-8ef6-106af85fa838",
+      "botId": "69cefc51-c949-4348-98ed-534cb9fe2695",
       "scopes": ["personal", "team", "groupChat"],
       "supportsFiles": false,
       "commandLists": [
@@ -70,7 +70,7 @@
     "customEngineAgents": [
       {
         "type": "bot",
-        "id": "f85478ca-c646-48ef-8ef6-106af85fa838"
+        "id": "69cefc51-c949-4348-98ed-534cb9fe2695"
       }
     ]
   }
