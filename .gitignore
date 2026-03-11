@@ -125,3 +125,4 @@ Thumbs.db
 .azure/
 
 logs/
+advisor/utils/token_fatcher/chrome/*
