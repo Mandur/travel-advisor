@@ -33,11 +33,11 @@ $ErrorActionPreference = "Stop"
 
 function Write-Banner {
     $width = 62
-    $border = "─" * $width
+    $border = "-" * $width
     Write-Host ""
-    Write-Host "  ┌$border┐" -ForegroundColor Cyan
-    Write-Host "  │$((" " * [int](($width - 20) / 2)))Advisor Agent Chat$((" " * [int][Math]::Ceiling(($width - 20) / 2)))│" -ForegroundColor Cyan
-    Write-Host "  └$border┘" -ForegroundColor Cyan
+    Write-Host "  +$border+" -ForegroundColor Cyan
+    Write-Host "  |$((" " * [int](($width - 20) / 2)))Advisor Agent Chat$((" " * [int][Math]::Ceiling(($width - 20) / 2)))|" -ForegroundColor Cyan
+    Write-Host "  +$border+" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  Endpoint : $Url" -ForegroundColor DarkGray
     Write-Host "  Commands : /new  start a new session" -ForegroundColor DarkGray
@@ -73,7 +73,7 @@ function Assert-AgentReachable([string]$BaseUrl) {
     }
     catch {
         Write-Host ""
-        Write-Host "  ✘  Cannot reach advisor agent at $BaseUrl" -ForegroundColor Red
+        Write-Host "  x  Cannot reach advisor agent at $BaseUrl" -ForegroundColor Red
         Write-Host "     Make sure docker-compose is running:  docker-compose up" -ForegroundColor DarkRed
         Write-Host "     Or pass a different URL:  .\scripts\chat.ps1 -Url <url>" -ForegroundColor DarkRed
         Write-Host ""
@@ -106,7 +106,7 @@ while ($true) {
         "quit"  { Write-Host "`n  Goodbye!`n" -ForegroundColor Cyan; exit 0 }
         "/new"  {
             $currentSessionId = New-SessionId
-            Write-Host "  ↺  New session started: $currentSessionId`n" -ForegroundColor Yellow
+            Write-Host "  o  New session started: $currentSessionId`n" -ForegroundColor Yellow
             continue
         }
         "/id"   {
@@ -169,7 +169,7 @@ while ($true) {
     }
     catch {
         Write-Host "" 
-        Write-Host "  ✘  Request failed: $_" -ForegroundColor Red
+        Write-Host "  x  Request failed: $_" -ForegroundColor Red
         Write-Host ""
     }
 }

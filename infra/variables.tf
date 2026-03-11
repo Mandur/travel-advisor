@@ -27,6 +27,19 @@ variable "rfp_api_base_url" {
   default     = "https://mockzilla-api-erfpmad.delightfulmoss-ca1544a1.eastus.azurecontainerapps.io/mock/rfp"
 }
 
+variable "hotelligence_bearer_token" {
+  description = "Bearer token for the Hotelligence360 GraphQL API"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "hotelligence_graphql_url" {
+  description = "Hotelligence360 GraphQL endpoint URL"
+  type        = string
+  default     = "https://hotelligence360-stage.travelclick.com/chatbot/graphql"
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)

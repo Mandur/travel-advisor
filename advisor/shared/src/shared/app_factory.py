@@ -3,8 +3,9 @@
 import asyncio
 import sys
 import uuid
+from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
-from typing import Annotated, Any, Callable
+from typing import Annotated, Any
 
 import openai
 import uvicorn
@@ -50,8 +51,22 @@ def create_app(
     *,
     include_teams: bool = False,
     module_path: str = "",
+    on_startup: Callable[[], Awaitable[None]] | None = None,
 ) -> FastAPI:
-    """Build a FastAPI app for any agent with /health, /chat, and optional /api/messages."""
+    """Build a FastAPI app for any agent with /health, /chat, and optional /api/messages.
+
+    Args:
+        title: Human-readable name for the service (used in logs and OpenAPI docs).
+        create_agent_fn: Factory that returns the compiled LangGraph (receives an
+            optional ``checkpointer`` keyword argument).
+        include_teams: When ``True``, mounts the Teams/Bot Service adapter at
+            ``POST /api/messages``.
+        module_path: Reserved for future use.
+        on_startup: Optional async callable invoked during the lifespan startup phase,
+            before the agent is created.  Failures are logged as warnings and do not
+            prevent the server from starting.  Intended for one-time initialisation
+            tasks such as fetching an access token.
+    """
 
     logger = setup_logging(title.lower().replace(" ", "-"))
 
@@ -62,6 +77,13 @@ def create_app(
             setup_telemetry(config.application_insights_connection_string)
         except Exception as exc:  # noqa: BLE001
             logger.warning("Failed to configure telemetry: %s", exc)
+
+        if on_startup is not None:
+            try:
+                await on_startup()
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Startup hook failed: %s", exc)
+
         redis_url = config.redis_url.strip()
         if not redis_url:
             logger.info("No REDIS_URL configured; starting without persistent LangGraph checkpointing")
