@@ -1,8 +1,9 @@
 """
-Rewrite of ag_ui_langgraph.add_langgraph_fastapi_endpoint because the agent
-isn't available at import time of scaffolding the FastAPI app in app_factory.py.
+This is a rewrite of ag_ui_langgraph.add_langgraph_fastapi_endpoint:
+https://github.com/ag-ui-protocol/ag-ui/blob/bd606a1dcd9ae209e0c6f4382d4a2569a535a368/integrations/langgraph/python/ag_ui_langgraph/endpoint.py#L9
 
-This version allows passing a lambda that returns the agent, enabling dynamic retrieval from app.state.
+We can't use the original version directly because it expects the agent to be available at the time of endpoint creation,
+but in our architecture, the agent is created asynchronously during the FastAPI app's lifespan.
 """
 
 from fastapi import FastAPI, Request
@@ -13,7 +14,7 @@ from ag_ui.encoder import EventEncoder
 
 
 def add_langgraph_fastapi_endpoint_patched(
-    app: FastAPI, path: str = "/sample_agent_id"
+    app: FastAPI, path: str = "/agent/sample_agent_id"
 ):
     """Adds endpoints to the FastAPI app to enable AG-UI integration."""
 
