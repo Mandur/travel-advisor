@@ -12,7 +12,9 @@ from ag_ui.core.types import RunAgentInput
 from ag_ui.encoder import EventEncoder
 
 
-def add_langgraph_fastapi_endpoint_patched(app: FastAPI, path: str = "/"):
+def add_langgraph_fastapi_endpoint_patched(
+    app: FastAPI, path: str = "/sample_agent_id"
+):
     """Adds endpoints to the FastAPI app to enable AG-UI integration."""
 
     @app.post(path)
