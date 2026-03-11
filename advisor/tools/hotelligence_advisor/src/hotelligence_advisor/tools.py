@@ -155,4 +155,68 @@ async def query_hotelligence_advisor(
     return result
 
 
+@tool
+async def get_ati_data_for_evaluation(
+    start_date: Annotated[str, Field(description="Event start date in YYYY-MM-DD format, extracted from RFP event information")],
+    end_date: Annotated[str, Field(description="Event end date in YYYY-MM-DD format, extracted from RFP event information")],
+) -> dict[str, Any]:
+    """Retrieve hotel occupancy data for a given date range for RFP evaluation.
+
+    Call this tool when evaluating an RFP to get the property's occupancy
+    picture over the event period.  The dates must be extracted from the RFP
+    event data (``eventBlocks``, ``guestRoomBlocks``, or ``arrivalDate`` /
+    ``departureDate`` fields) before calling this tool.
+
+    Currently fetches occupancy.  Additional ATI metrics (ADR, RevPAR, pace,
+    competitive set) will be added here in future iterations.
+
+    Returns a dict with:
+      - ``answer``: Narrative occupancy summary from the advisor.
+      - ``data_table``: Structured occupancy rows (list of dicts).
+      - ``currency_symbol``: Currency used.
+      - ``applied_filters``: Filters the API applied (confirmed date range, etc.).
+      - ``bubble_prompts``: Suggested follow-up questions.
+      - ``extracted_metrics``: Metrics returned in this query.
+      - ``thread``: Thread ID for follow-up queries.
+    """
+    message = f"Show my occupancy from {start_date} to {end_date}"
+
+    # Auto-inject property defaults the same way query_hotelligence_advisor does.
+    tc_prop_id: int | None = None
+    owned_prop_id: int = 0
+    defaults = get_token_store().get_default_props()
+    if defaults is not None:
+        tc_prop_id, owned_prop_id = defaults
+        logger.debug(
+            "get_ati_data_for_evaluation: auto-injected property defaults tc_prop_id=%d owned_prop_id=%d",
+            tc_prop_id,
+            owned_prop_id,
+        )
+
+    raw = await _call_chatbot(
+        message=message,
+        tc_prop_id=tc_prop_id,
+        owned_prop_id=owned_prop_id,
+        thread_id=None,
+    )
+    assistant = raw.get("assistant_response") or {}
+    result = {
+        "answer": assistant.get("answer", ""),
+        "data_table": assistant.get("data_table", []),
+        "currency_symbol": assistant.get("currency_symbol", ""),
+        "applied_filters": raw.get("applied_filters", {}),
+        "bubble_prompts": raw.get("bubble_prompts", []),
+        "extracted_metrics": raw.get("extracted_metrics", []),
+        "thread": raw.get("thread", ""),
+    }
+    logger.info(
+        "get_ati_data_for_evaluation [%s → %s]: answer length %d chars",
+        start_date,
+        end_date,
+        len(result["answer"]),
+    )
+    return result
+
+
 HOTELLIGENCE_TOOLS = [query_hotelligence_advisor]
+ATI_EVALUATION_TOOLS = [get_ati_data_for_evaluation]
