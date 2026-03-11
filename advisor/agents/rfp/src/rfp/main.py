@@ -3,7 +3,11 @@
 from shared.app_factory import create_app, run_app
 from rfp.agent import create_agent
 
-app = create_app("RFP Agent", create_agent)
+app = create_app(
+    agent_id="rfp_agent",
+    title="RFP Agent",
+    create_agent_fn=create_agent,
+)
 
 if __name__ == "__main__":
     run_app("rfp.main:app")

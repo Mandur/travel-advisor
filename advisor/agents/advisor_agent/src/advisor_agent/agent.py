@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from copilotkit import CopilotKitMiddleware
 from langchain.agents import create_agent as _build_agent
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
@@ -46,17 +47,24 @@ def create_agent(checkpointer: "BaseCheckpointSaver") -> "CompiledStateGraph":
 
     if not config.rfp_agent_url:
         from rfp.agent import create_agent as create_rfp_agent
+
         _rfp_graph = create_rfp_agent()
         logger.info("RFP agent: in-process mode")
     else:
         logger.info("RFP agent: HTTP mode -> %s", config.rfp_agent_url)
 
     if not config.property_planning_agent_url:
-        from property_planning.agent import create_agent as create_property_planning_agent
+        from property_planning.agent import (
+            create_agent as create_property_planning_agent,
+        )
+
         _property_planning_graph = create_property_planning_agent()
         logger.info("Property planning agent: in-process mode")
     else:
-        logger.info("Property planning agent: HTTP mode -> %s", config.property_planning_agent_url)
+        logger.info(
+            "Property planning agent: HTTP mode -> %s",
+            config.property_planning_agent_url,
+        )
 
     @tool
     async def rfp_agent(query: str, config: RunnableConfig) -> str:
@@ -78,7 +86,9 @@ def create_agent(checkpointer: "BaseCheckpointSaver") -> "CompiledStateGraph":
             cfg = get_config()
             if cfg.property_planning_agent_url:
                 session_id = config.get("configurable", {}).get("thread_id", "")
-                return await invoke_agent_http(cfg.property_planning_agent_url, query, session_id)
+                return await invoke_agent_http(
+                    cfg.property_planning_agent_url, query, session_id
+                )
             return await invoke_agent_inprocess(_property_planning_graph, query, config)
         except Exception as exc:
             logger.exception("property_planning_agent tool failed")
@@ -89,6 +99,7 @@ def create_agent(checkpointer: "BaseCheckpointSaver") -> "CompiledStateGraph":
         supervisor_llm,
         [rfp_agent, property_planning_agent],
         system_prompt=SUPERVISOR_INSTRUCTIONS,
+        middleware=[CopilotKitMiddleware()],
         checkpointer=checkpointer,
     )
 

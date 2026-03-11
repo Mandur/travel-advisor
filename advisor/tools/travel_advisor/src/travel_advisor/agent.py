@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import date
 from typing import TYPE_CHECKING
 
+from copilotkit import CopilotKitMiddleware
 from langchain.agents import create_agent as _build_agent
 from langchain_core.tools import tool
 
@@ -83,17 +84,25 @@ def get_price_forecast(
         predicted_price=165.0,
         trend="stable",
     )
-    logger.info("Generated forecast for %s: $%.2f (%s)", destination, forecast.predicted_price, forecast.trend)
+    logger.info(
+        "Generated forecast for %s: $%.2f (%s)",
+        destination,
+        forecast.predicted_price,
+        forecast.trend,
+    )
     return forecast.model_dump(mode="json")
 
 
-def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":
+def create_agent(
+    checkpointer: "BaseCheckpointSaver | None" = None,
+) -> "CompiledStateGraph":
     """Create and return the travel advisor agent as a compiled LangGraph."""
     config = get_config()
     llm = create_llm(config.gpt5_mini_deployment)
     graph = _build_agent(
         llm,
         [get_hotel_pricing, get_price_forecast],
+        middleware=[CopilotKitMiddleware()],
         system_prompt=TRAVEL_ADVISOR_INSTRUCTIONS,
         checkpointer=checkpointer,
     )
