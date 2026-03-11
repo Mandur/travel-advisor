@@ -50,6 +50,7 @@ def create_app(
     create_agent_fn: Callable[..., CompiledStateGraph],
     *,
     include_teams: bool = False,
+    include_notifications: bool = False,
     module_path: str = "",
     on_startup: Callable[[], Awaitable[None]] | None = None,
 ) -> FastAPI:
@@ -61,6 +62,8 @@ def create_app(
             optional ``checkpointer`` keyword argument).
         include_teams: When ``True``, mounts the Teams/Bot Service adapter at
             ``POST /api/messages``.
+        include_notifications: When ``True``, mounts the Teams activity feed
+            notification endpoint at ``POST /notify``.
         module_path: Reserved for future use.
         on_startup: Optional async callable invoked during the lifespan startup phase,
             before the agent is created.  Failures are logged as warnings and do not
@@ -104,6 +107,11 @@ def create_app(
         from shared.teams_adapter import create_teams_router
 
         app.include_router(create_teams_router(lambda: app.state.agent))
+
+    if include_notifications:
+        from shared.teams_adapter import create_notification_router
+
+        app.include_router(create_notification_router())
 
     def get_agent(request: Request) -> CompiledStateGraph:
         return request.app.state.agent

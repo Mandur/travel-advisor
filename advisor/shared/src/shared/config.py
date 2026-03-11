@@ -52,6 +52,10 @@ class AgentConfig(BaseSettings):
     # Defaults to the bundled binary in the token_fatcher package if present,
     # or pyppeteer's own downloaded Chromium if empty.
     chrome_executable_path: Annotated[str, Field(validation_alias="CHROME_EXECUTABLE_PATH")] = ""
+    # Teams activity feed notification endpoint.
+    # Set NOTIFY_API_KEY to protect POST /notify with an X-Notify-Key header check.
+    # Leave empty to skip authentication (safe when Container Apps ingress is internal-only).
+    notify_api_key: Annotated[str, Field(validation_alias="NOTIFY_API_KEY")] = ""
     # SSL / TLS
     # Set SSL_VERIFY=false to disable certificate verification (e.g. corporate proxies).
     # Set SSL_CA_BUNDLE=/path/to/ca-bundle.crt to trust a custom CA (preferred over disabling).

@@ -66,6 +66,22 @@
     "*.azurecontainerapps.io"
   ],
 
+  "webApplicationInfo": {
+    "id": "69cefc51-c949-4348-98ed-534cb9fe2695",
+    "resource": "https://contoso.com"
+  },
+
+  "authorization": {
+    "permissions": {
+      "resourceSpecific": [
+        {
+          "type": "Application",
+          "name": "TeamsActivity.Send.User"
+        }
+      ]
+    }
+  },
+
   "copilotAgents": {
     "customEngineAgents": [
       {

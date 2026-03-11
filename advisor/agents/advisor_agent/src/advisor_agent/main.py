@@ -8,6 +8,7 @@ app = create_app(
     "Advisor Agent",
     create_agent,
     include_teams=True,
+    include_notifications=True,
     on_startup=get_token_store().initialize,
 )
 
