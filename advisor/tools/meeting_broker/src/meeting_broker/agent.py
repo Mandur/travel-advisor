@@ -41,11 +41,42 @@ def _extract_result_count(result: dict[str, Any]) -> int | None:
         return result["count"]
     if "totalCount" in result and isinstance(result["totalCount"], int):
         return result["totalCount"]
+    data = result.get("data")
+    if isinstance(data, dict) and isinstance(data.get("totalCount"), int):
+        return data["totalCount"]
     if "items" in result and isinstance(result["items"], list):
         return len(result["items"])
     if "rfps" in result and isinstance(result["rfps"], list):
         return len(result["rfps"])
+    if isinstance(data, dict) and isinstance(data.get("rfpSummaries"), list):
+        return len(data["rfpSummaries"])
     return None
+
+
+def _normalize_search_rfp_response(raw: dict[str, Any]) -> dict[str, Any]:
+    """Normalize legacy /rfps payload variants to a stable shape for validation."""
+    normalized = dict(raw)
+    data = normalized.get("data")
+
+    if isinstance(data, list):
+        if len(data) == 1 and isinstance(data[0], dict):
+            normalized["data"] = data[0]
+            data = normalized["data"]
+
+    # Some upstream responses return internalId as int. Coerce to string only for
+    # this field so strict model validation remains enabled for all other fields.
+    if isinstance(data, dict):
+        summaries = data.get("rfpSummaries")
+        if isinstance(summaries, list):
+            for summary in summaries:
+                if not isinstance(summary, dict):
+                    continue
+                internal_id = summary.get("internalId")
+                if internal_id is None or isinstance(internal_id, str):
+                    continue
+                summary["internalId"] = str(internal_id)
+
+    return normalized
 
 
 @lru_cache(maxsize=1)
@@ -116,7 +147,8 @@ async def _search_rfps_impl(
         "/rfps",
         params=params,
     )
-    result = SearchRfpResponse.model_validate(raw).model_dump()
+    normalized = _normalize_search_rfp_response(raw)
+    result = SearchRfpResponse.model_validate(normalized).model_dump()
     logger.info("RFP search complete result_count=%s", _extract_result_count(result))
     return result
 
