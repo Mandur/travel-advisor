@@ -96,12 +96,18 @@ async def _run_from_env() -> int:
     web_ui_url = os.getenv("WEB_UI_URL", "").strip()
     email = os.getenv("UI_LOGIN_EMAIL", "").strip()
     password = os.getenv("UI_LOGIN_PASSWORD", "").strip()
+    chrome_executable = os.getenv("CHROME_EXECUTABLE_PATH", "").strip() or None
 
     if not web_ui_url or not email or not password:
         print("Missing WEB_UI_URL, UI_LOGIN_EMAIL, or UI_LOGIN_PASSWORD")
         return 2
 
-    token = await fetch_access_token(web_ui_url=web_ui_url, email=email, password=password)
+    token = await fetch_access_token(
+        web_ui_url=web_ui_url,
+        email=email,
+        password=password,
+        chrome_executable=chrome_executable,
+    )
     if not token:
         print("Token was not found")
         return 1
