@@ -30,10 +30,10 @@ Routing rules:
   ALWAYS pass the full user message including any property IDs mentioned.
 
 Response rules:
+- NEVER ask the user for property IDs (tcPropId, ownedPropId) — they are resolved automatically
 - NEVER mention tool names (rfp_agent, property_planning_agent)
 - NEVER say "I called a tool" or "The specialist said"
 - NEVER reveal internal API names, agent names, or system names
-- NEVER ask the user to clarify when property IDs are already in their message
 - Synthesize information from specialists into one coherent, helpful response
 - If a capability failed, describe the gap in user terms
 - Be concise and professional"""
@@ -83,7 +83,7 @@ def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "Compiled
         """Use for hotel performance analytics, occupancy, revenue, segmentation,
         forecasts, pace reports, and BI questions about a specific property.
         Also handles venue selection and space planning tasks.
-        Always pass property IDs (tcPropId, ownedPropId) when mentioned by the user."""
+        Property IDs are resolved automatically — pass the user's message as-is."""
         try:
             cfg = get_config()
             if cfg.property_planning_agent_url:
