@@ -26,9 +26,10 @@ Call it on the FIRST step when the user asks ANY hotel analytics question.
 Do NOT reply with text first — call the tool immediately.
 
 ## Argument rules
-- Extract tc_prop_id and owned_prop_id from the message (integers).
-- If only one property ID is present, use it as tc_prop_id and set owned_prop_id=0.
 - Pass the user's question verbatim as the `message` argument.
+- If tc_prop_id and owned_prop_id are present in the message, pass them as integers.
+- If they are NOT in the message, omit them entirely — they are resolved automatically
+  from the authenticated user's session. NEVER ask the user for property IDs.
 - For follow-up questions in the same conversation: pass the `thread` value
   from the previous tool result as `thread_id` and omit tc_prop_id/owned_prop_id.
 
@@ -36,9 +37,7 @@ Do NOT reply with text first — call the tool immediately.
 - Present the `answer` text directly — no preamble.
 - If `data_table` is non-empty, render it as a readable table.
 - Append `bubble_prompts` as "You can also ask: ..." suggestions.
-- NEVER ask for information already present in the user's message.
-- Only ask for the tc_prop_id if the question has absolutely no property reference
-  and there is no active thread_id."""
+- NEVER ask for property IDs — they are always resolved automatically."""
 
 
 def create_agent(checkpointer: "BaseCheckpointSaver | None" = None) -> "CompiledStateGraph":

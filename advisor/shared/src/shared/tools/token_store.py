@@ -2,12 +2,45 @@
 
 from __future__ import annotations
 
+import base64
+import json
 from functools import lru_cache
 
 from shared.config import get_config
 from shared.utils import setup_logging
 
 logger = setup_logging("token-store")
+
+# Maps known user emails to their default Hotelligence property IDs.
+# These are injected automatically into queries when the authenticated user
+# matches a key here, so the LLM never needs to supply them manually.
+_USER_PROPERTY_DEFAULTS: dict[str, tuple[int, int]] = {
+    "colyndemo@amadeus.com": (267955, 590225),  # (tc_prop_id, owned_prop_id)
+}
+
+
+def _decode_jwt_email(token: str) -> str | None:
+    """Extract the email/username from a JWT payload without verifying the signature.
+
+    Tries the ``email``, ``sub``, and ``username`` claims in that order.
+    Returns ``None`` if the token is malformed or no matching claim is found.
+    """
+    try:
+        parts = token.split(".")
+        if len(parts) != 3:
+            return None
+        # Add padding so base64 decoding doesn't fail on tokens whose payload
+        # length is not a multiple of 4.
+        padding = "=" * (-len(parts[1]) % 4)
+        payload = json.loads(base64.b64decode(parts[1] + padding).decode("utf-8"))
+        return (
+            payload.get("email")
+            or payload.get("user_name")
+            or payload.get("sub")
+            or payload.get("username")
+        )
+    except Exception:  # noqa: BLE001
+        return None
 
 
 class TokenStore:
@@ -19,7 +52,26 @@ class TokenStore:
 
     Falls back to ``HOTELLIGENCE_BEARER_TOKEN`` from config when browser
     credentials are not configured.
+
+    After a successful token fetch the JWT payload is decoded to identify the
+    authenticated user.  If that user appears in :data:`_USER_PROPERTY_DEFAULTS`
+    the corresponding ``(tc_prop_id, owned_prop_id)`` pair is returned by
+    :meth:`get_default_props` and injected automatically into Hotelligence
+    queries so the LLM never needs to supply them manually.
     """
+
+    def __init__(self) -> None:
+        self._user_email: str | None = None
+
+    def get_default_props(self) -> tuple[int, int] | None:
+        """Return ``(tc_prop_id, owned_prop_id)`` for the current user, or ``None``.
+
+        Returns the hardcoded property pair when the authenticated user's email
+        matches a key in :data:`_USER_PROPERTY_DEFAULTS`; ``None`` otherwise.
+        """
+        if self._user_email and self._user_email in _USER_PROPERTY_DEFAULTS:
+            return _USER_PROPERTY_DEFAULTS[self._user_email]
+        return None
 
     async def _fetch(self) -> str | None:
         import asyncio
@@ -69,6 +121,15 @@ class TokenStore:
         if token:
             from shared.tools.hotelligence_client import get_hotelligence_client  # noqa: PLC0415
             get_hotelligence_client().update_token(token)
+            self._user_email = _decode_jwt_email(token)
+            if self._user_email:
+                logger.info("Authenticated as %s", self._user_email)
+                if self.get_default_props():
+                    logger.info(
+                        "Default property IDs for %s: tc_prop_id=%d, owned_prop_id=%d",
+                        self._user_email,
+                        *self.get_default_props(),  # type: ignore[misc]
+                    )
             logger.info("Hotelligence token initialised successfully")
         else:
             logger.info("Using static HOTELLIGENCE_BEARER_TOKEN")
@@ -80,6 +141,7 @@ class TokenStore:
         if token:
             from shared.tools.hotelligence_client import get_hotelligence_client  # noqa: PLC0415
             get_hotelligence_client().update_token(token)
+            self._user_email = _decode_jwt_email(token)
             logger.info("Hotelligence token refreshed successfully")
         else:
             logger.warning("Could not refresh token — browser credentials not configured")

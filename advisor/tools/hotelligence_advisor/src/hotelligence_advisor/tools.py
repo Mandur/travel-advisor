@@ -21,9 +21,21 @@ async def _call_chatbot(
     owned_prop_id: int,
     thread_id: str | None,
 ) -> dict[str, Any]:
-    """Execute the chatbot query, refreshing the token once on 401/403."""
+    """Execute the chatbot query, refreshing the token once on 401/403.
+
+    Also retries once on ReadTimeout (stale keep-alive connection).
+    """
     client = get_hotelligence_client()
     try:
+        return await client.query_chatbot(
+            message=message,
+            tc_prop_id=tc_prop_id,
+            owned_prop_id=owned_prop_id,
+            thread_id=thread_id,
+        )
+    except httpx.ReadTimeout:
+        logger.warning("Hotelligence ReadTimeout — retrying once with a fresh connection")
+        client.reset_connection()
         return await client.query_chatbot(
             message=message,
             tc_prop_id=tc_prop_id,
@@ -55,8 +67,8 @@ async def query_hotelligence_advisor(
             default=None,
             description=(
                 "TravelClick property ID (integer), e.g. 12917. "
-                "Required for the FIRST question in a conversation. "
-                "Omit if thread_id is provided."
+                "Only provide if explicitly mentioned in the user's message. "
+                "When omitted, the value is resolved automatically — do NOT ask the user for it."
             ),
         ),
     ] = None,
@@ -64,7 +76,11 @@ async def query_hotelligence_advisor(
         int,
         Field(
             default=0,
-            description="Owned property ID (integer), e.g. 306393. Used alongside tc_prop_id.",
+            description=(
+                "Owned property ID (integer), e.g. 306393. "
+                "Only provide if explicitly mentioned in the user's message. "
+                "When omitted, the value is resolved automatically — do NOT ask the user for it."
+            ),
         ),
     ] = 0,
     thread_id: Annotated[
@@ -87,6 +103,8 @@ async def query_hotelligence_advisor(
 
     Conversation flow:
     1. FIRST question in a session: provide ``tc_prop_id`` (and ``owned_prop_id``).
+       For known demo users the property IDs are injected automatically — no need
+       to ask the user for them.
     2. FOLLOW-UP questions: use the ``thread_id`` from the previous response so the
        API retains property context — no need to repeat property IDs.
 
@@ -99,6 +117,18 @@ async def query_hotelligence_advisor(
       - ``thread``: Thread ID — ALWAYS pass this to the next query as ``thread_id``.
       - ``extracted_metrics``: Metrics used in this query.
     """
+    # Auto-fill property IDs from the token store when the authenticated user
+    # has hardcoded defaults and no explicit IDs or thread were provided.
+    if thread_id is None and tc_prop_id is None:
+        defaults = get_token_store().get_default_props()
+        if defaults is not None:
+            tc_prop_id, owned_prop_id = defaults
+            logger.debug(
+                "Auto-injected property defaults from token store: tc_prop_id=%d, owned_prop_id=%d",
+                tc_prop_id,
+                owned_prop_id,
+            )
+
     raw = await _call_chatbot(
         message=message,
         tc_prop_id=tc_prop_id,

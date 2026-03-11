@@ -68,6 +68,10 @@ class HotelligenceClient:
             },
             timeout=timeout,
             verify=ssl_verify,
+            # Expire idle keep-alive connections after 30 s so we never try to
+            # reuse a connection the server has already closed.
+            limits=httpx.Limits(keepalive_expiry=30, max_connections=10),
+            transport=httpx.AsyncHTTPTransport(retries=1),
         )
 
     async def query_chatbot(
@@ -129,6 +133,23 @@ class HotelligenceClient:
     def update_token(self, token: str) -> None:
         """Replace the Authorization header with a refreshed bearer token."""
         self._client.headers["Authorization"] = f"Bearer {token}"
+
+    def reset_connection(self) -> None:
+        """Close and recreate the underlying httpx client to clear stale connections."""
+        config = get_config()
+        ssl_verify: bool | str = config.ssl_ca_bundle if config.ssl_ca_bundle else config.ssl_verify
+        token = self._client.headers.get("Authorization", "")
+        self._client = httpx.AsyncClient(
+            headers={
+                "Authorization": token,
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            timeout=self._client.timeout,
+            verify=ssl_verify,
+            limits=httpx.Limits(keepalive_expiry=30, max_connections=10),
+            transport=httpx.AsyncHTTPTransport(retries=1),
+        )
 
     async def aclose(self) -> None:
         await self._client.aclose()
