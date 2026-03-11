@@ -8,6 +8,7 @@ app = create_app(
     title="Advisor Agent",
     create_agent_fn=create_agent,
     include_teams=True,
+    include_agui=True,
 )
 
 if __name__ == "__main__":
