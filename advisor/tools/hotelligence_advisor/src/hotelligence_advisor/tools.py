@@ -87,6 +87,8 @@ async def query_hotelligence_advisor(
 
     Conversation flow:
     1. FIRST question in a session: provide ``tc_prop_id`` (and ``owned_prop_id``).
+       For known demo users the property IDs are injected automatically — no need
+       to ask the user for them.
     2. FOLLOW-UP questions: use the ``thread_id`` from the previous response so the
        API retains property context — no need to repeat property IDs.
 
@@ -99,6 +101,18 @@ async def query_hotelligence_advisor(
       - ``thread``: Thread ID — ALWAYS pass this to the next query as ``thread_id``.
       - ``extracted_metrics``: Metrics used in this query.
     """
+    # Auto-fill property IDs from the token store when the authenticated user
+    # has hardcoded defaults and no explicit IDs or thread were provided.
+    if thread_id is None and tc_prop_id is None:
+        defaults = get_token_store().get_default_props()
+        if defaults is not None:
+            tc_prop_id, owned_prop_id = defaults
+            logger.debug(
+                "Auto-injected property defaults from token store: tc_prop_id=%d, owned_prop_id=%d",
+                tc_prop_id,
+                owned_prop_id,
+            )
+
     raw = await _call_chatbot(
         message=message,
         tc_prop_id=tc_prop_id,
