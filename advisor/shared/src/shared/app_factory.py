@@ -9,9 +9,9 @@ from typing import Annotated, Any, Callable
 import openai
 import uvicorn
 from copilotkit import LangGraphAGUIAgent
-from .langchain_endpoint import add_langgraph_fastapi_endpoint_patched
 from fastapi import Depends, FastAPI, HTTPException, Request
 from langchain_core.messages import HumanMessage
+from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.graph.state import CompiledStateGraph
 from pydantic import BaseModel
@@ -23,6 +23,8 @@ from shared.utils import (
     setup_logging,
     setup_telemetry,
 )
+
+from .langchain_endpoint import add_langgraph_fastapi_endpoint_patched
 
 
 class ChatRequest(BaseModel):
@@ -70,9 +72,18 @@ def create_app(
         pg_conn = config.postgres_connection_string.replace(
             "postgresql+psycopg://", "postgresql://", 1
         )
-        async with AsyncPostgresSaver.from_conn_string(pg_conn) as checkpointer:
-            await checkpointer.setup()
-            app.state.agent = create_agent_fn(checkpointer=checkpointer)
+        if pg_conn:
+            async with AsyncPostgresSaver.from_conn_string(pg_conn) as checkpointer:
+                await checkpointer.setup()
+                app.state.agent = create_agent_fn(checkpointer=checkpointer)
+                logger.info("%s ready", title)
+                yield
+        else:
+            app.state.agent = create_agent_fn(checkpointer=InMemorySaver())
+            logger.warning(
+                "Can not connect to Postgres, proceeding without checkpointer: %s",
+                title,
+            )
             logger.info("%s ready", title)
             yield
 
