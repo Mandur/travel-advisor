@@ -21,9 +21,21 @@ async def _call_chatbot(
     owned_prop_id: int,
     thread_id: str | None,
 ) -> dict[str, Any]:
-    """Execute the chatbot query, refreshing the token once on 401/403."""
+    """Execute the chatbot query, refreshing the token once on 401/403.
+
+    Also retries once on ReadTimeout (stale keep-alive connection).
+    """
     client = get_hotelligence_client()
     try:
+        return await client.query_chatbot(
+            message=message,
+            tc_prop_id=tc_prop_id,
+            owned_prop_id=owned_prop_id,
+            thread_id=thread_id,
+        )
+    except httpx.ReadTimeout:
+        logger.warning("Hotelligence ReadTimeout — retrying once with a fresh connection")
+        client.reset_connection()
         return await client.query_chatbot(
             message=message,
             tc_prop_id=tc_prop_id,
@@ -55,8 +67,8 @@ async def query_hotelligence_advisor(
             default=None,
             description=(
                 "TravelClick property ID (integer), e.g. 12917. "
-                "Required for the FIRST question in a conversation. "
-                "Omit if thread_id is provided."
+                "Only provide if explicitly mentioned in the user's message. "
+                "When omitted, the value is resolved automatically — do NOT ask the user for it."
             ),
         ),
     ] = None,
@@ -64,7 +76,11 @@ async def query_hotelligence_advisor(
         int,
         Field(
             default=0,
-            description="Owned property ID (integer), e.g. 306393. Used alongside tc_prop_id.",
+            description=(
+                "Owned property ID (integer), e.g. 306393. "
+                "Only provide if explicitly mentioned in the user's message. "
+                "When omitted, the value is resolved automatically — do NOT ask the user for it."
+            ),
         ),
     ] = 0,
     thread_id: Annotated[

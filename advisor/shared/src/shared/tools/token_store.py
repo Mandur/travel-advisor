@@ -33,7 +33,12 @@ def _decode_jwt_email(token: str) -> str | None:
         # length is not a multiple of 4.
         padding = "=" * (-len(parts[1]) % 4)
         payload = json.loads(base64.b64decode(parts[1] + padding).decode("utf-8"))
-        return payload.get("email") or payload.get("sub") or payload.get("username")
+        return (
+            payload.get("email")
+            or payload.get("user_name")
+            or payload.get("sub")
+            or payload.get("username")
+        )
     except Exception:  # noqa: BLE001
         return None
 
