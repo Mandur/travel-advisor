@@ -4,13 +4,46 @@ from __future__ import annotations
 
 from typing import Annotated, Any
 
+import httpx
 from langchain_core.tools import tool
 from pydantic import Field
 
 from shared.tools.hotelligence_client import get_hotelligence_client
+from shared.tools.token_store import get_token_store
 from shared.utils import setup_logging
 
 logger = setup_logging("hotelligence-advisor")
+
+
+async def _call_chatbot(
+    message: str,
+    tc_prop_id: int | None,
+    owned_prop_id: int,
+    thread_id: str | None,
+) -> dict[str, Any]:
+    """Execute the chatbot query, refreshing the token once on 401/403."""
+    client = get_hotelligence_client()
+    try:
+        return await client.query_chatbot(
+            message=message,
+            tc_prop_id=tc_prop_id,
+            owned_prop_id=owned_prop_id,
+            thread_id=thread_id,
+        )
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code in (401, 403):
+            logger.warning(
+                "Hotelligence auth error %d — refreshing token and retrying",
+                exc.response.status_code,
+            )
+            await get_token_store().refresh()
+            return await client.query_chatbot(
+                message=message,
+                tc_prop_id=tc_prop_id,
+                owned_prop_id=owned_prop_id,
+                thread_id=thread_id,
+            )
+        raise
 
 
 @tool
@@ -66,8 +99,7 @@ async def query_hotelligence_advisor(
       - ``thread``: Thread ID — ALWAYS pass this to the next query as ``thread_id``.
       - ``extracted_metrics``: Metrics used in this query.
     """
-    client = get_hotelligence_client()
-    raw = await client.query_chatbot(
+    raw = await _call_chatbot(
         message=message,
         tc_prop_id=tc_prop_id,
         owned_prop_id=owned_prop_id,

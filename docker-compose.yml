@@ -18,6 +18,12 @@ services:
       # Sub-agent dispatch: set URLs for HTTP mode, leave empty for in-process
       RFP_AGENT_URL: http://rfp-agent:8088
       PROPERTY_PLANNING_AGENT_URL: http://property-planning-agent:8088
+      # Hotelligence360 — set all three browser-auth vars
+      # to have the agent fetch a fresh token at startup via headless Chrome.
+      HOTELLIGENCE_GRAPHQL_URL: ${HOTELLIGENCE_GRAPHQL_URL:-}
+      WEB_UI_URL: ${WEB_UI_URL:-}
+      UI_LOGIN_EMAIL: ${UI_LOGIN_EMAIL:-}
+      UI_LOGIN_PASSWORD: ${UI_LOGIN_PASSWORD:-}
 
   rfp-agent:
     image: hacktrial.azurecr.io/rfp-agent:${TAG:-0.0.1}
@@ -50,3 +56,4 @@ services:
       AZURE_OPENAI_MINI_DEPLOYMENT: ${AZURE_OPENAI_MINI_DEPLOYMENT:-}
       APPLICATIONINSIGHTS_CONNECTION_STRING: ${APPLICATIONINSIGHTS_CONNECTION_STRING:-}
       REDIS_URL: ${REDIS_URL:-}
+      HOTELLIGENCE_GRAPHQL_URL: ${HOTELLIGENCE_GRAPHQL_URL:-}

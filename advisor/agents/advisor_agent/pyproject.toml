@@ -7,6 +7,8 @@ dependencies = [
     "shared",
     "rfp-agent",
     "property-planning-agent",
+    "hotelligence-advisor",
+    "token-fatcher",
     "azure-identity>=1.15",
 ]
 
@@ -21,3 +23,5 @@ packages = ["src/advisor_agent"]
 shared = { workspace = true }
 rfp-agent = { workspace = true }
 property-planning-agent = { workspace = true }
+hotelligence-advisor = { workspace = true }
+token-fatcher = { workspace = true }

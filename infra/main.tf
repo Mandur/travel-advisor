@@ -138,6 +138,8 @@ module "appservice" {
   bot_app_tenant_id              = data.azurerm_client_config.current.tenant_id
   bearer_token                   = var.bearer_token
   rfp_api_base_url               = var.rfp_api_base_url
+  hotelligence_bearer_token      = var.hotelligence_bearer_token
+  hotelligence_graphql_url       = var.hotelligence_graphql_url
   tags                           = var.tags
 }
 

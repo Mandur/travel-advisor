@@ -21,12 +21,23 @@ COPY advisor/agents/property_planning/ advisor/agents/property_planning/
 # Copy tools (used as library dependencies by the routing agent)
 COPY advisor/tools/travel_advisor/ advisor/tools/travel_advisor/
 COPY advisor/tools/meeting_broker/ advisor/tools/meeting_broker/
+COPY advisor/tools/hotelligence_advisor/ advisor/tools/hotelligence_advisor/
+
+# Copy utils
+COPY advisor/utils/token_fatcher/ advisor/utils/token_fatcher/
 
 # Install dependencies for this specific agent
 RUN uv sync --package advisor-agent --no-dev --frozen
 
 # --- Stage 2: Runtime ---
 FROM python:3.12-slim
+
+# Install Chromium for headless browser-based token fetching.
+# --no-install-recommends keeps the layer lean; libnss3 and libatk* are
+# pulled in automatically as Chromium dependencies.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends chromium \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -40,11 +51,15 @@ COPY --from=builder /app/advisor/agents/rfp/src /app/advisor/agents/rfp/src
 COPY --from=builder /app/advisor/agents/property_planning/src /app/advisor/agents/property_planning/src
 COPY --from=builder /app/advisor/tools/travel_advisor/src /app/advisor/tools/travel_advisor/src
 COPY --from=builder /app/advisor/tools/meeting_broker/src /app/advisor/tools/meeting_broker/src
+COPY --from=builder /app/advisor/tools/hotelligence_advisor/src /app/advisor/tools/hotelligence_advisor/src
+COPY --from=builder /app/advisor/utils/token_fatcher/src /app/advisor/utils/token_fatcher/src
 
 # Add venv to PATH
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+# Point token_fatcher at the system Chromium installed above
+ENV CHROME_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Foundry requires port 8088
 EXPOSE 8088
