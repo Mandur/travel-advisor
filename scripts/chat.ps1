@@ -97,7 +97,7 @@ while ($true) {
     Write-Host "You  > " -ForegroundColor Green -NoNewline
     $userInput = Read-Host
 
-    # Blank line — skip
+    # Blank line - skip
     if ([string]::IsNullOrWhiteSpace($userInput)) { continue }
 
     # Built-in commands
@@ -135,7 +135,7 @@ while ($true) {
         # Word-wrap the reply to 80 chars, indented to align with "Agent> "
         $reply    = $result.reply
         $maxWidth = 80
-        $indent   = "       "   # 7 spaces — same width as "Agent> "
+        $indent   = "       "   # 7 spaces - same width as "Agent> "
 
         $words  = $reply -split ' '
         $line   = ""
